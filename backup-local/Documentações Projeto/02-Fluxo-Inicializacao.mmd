@@ -1,0 +1,23 @@
+flowchart TD
+    START([Início]) --> LOAD_ENV[Carregar config.env]
+    LOAD_ENV --> INIT_EXPRESS[Inicializar Express]
+    INIT_EXPRESS --> SET_MIDDLEWARE[Configurar Middleware]
+    SET_MIDDLEWARE --> CORS[CORS]
+    CORS --> JSON_PARSER[Express JSON]
+    JSON_PARSER --> STATIC_FILES[Arquivos Estáticos]
+    STATIC_FILES --> TRY_MONGO[Tentar Conectar MongoDB]
+    TRY_MONGO --> MONGO_SUCCESS{MongoDB OK?}
+    MONGO_SUCCESS -->|Sim| USE_MONGO[Usar MongoDB]
+    MONGO_SUCCESS -->|Não| USE_JSON[Usar JSON Fallback]
+    USE_MONGO --> SET_ROUTES[Configurar Rotas]
+    USE_JSON --> SET_ROUTES
+    SET_ROUTES --> START_SERVER[Iniciar Servidor]
+    START_SERVER --> SERVER_READY[Sistema Pronto]
+    
+    classDef startEnd fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef process fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef decision fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    
+    class START,SERVER_READY startEnd
+    class LOAD_ENV,INIT_EXPRESS,SET_MIDDLEWARE,CORS,JSON_PARSER,STATIC_FILES,TRY_MONGO,USE_MONGO,USE_JSON,SET_ROUTES,START_SERVER process
+    class MONGO_SUCCESS decision

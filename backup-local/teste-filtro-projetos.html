@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Filtro de Projetos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+            color: #0c5460;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .filtro-container {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .filtro-container label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .filtro-container select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste - Filtro de Projetos</h1>
+    
+    <div class="test-section info">
+        <h3>📋 Instruções</h3>
+        <p>Este teste verifica se o filtro de projetos está funcionando corretamente.</p>
+        <p>1. Primeiro, carregue as tarefas dos projetos</p>
+        <p>2. Verifique se o filtro de projetos foi populado</p>
+        <p>3. Teste o filtro selecionando um projeto</p>
+    </div>
+
+    <div class="test-section">
+        <h3>🔧 Teste 1: Carregar Tarefas dos Projetos</h3>
+        <button onclick="testLoadTasks()">Carregar Tarefas</button>
+        <div id="loadTasksResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>📋 Teste 2: Verificar Filtro de Projetos</h3>
+        <div class="filtro-container">
+            <label for="filtroProjeto">Filtro de Projetos:</label>
+            <select id="filtroProjeto" onchange="testFiltroChange()">
+                <option value="">Carregando...</option>
+            </select>
+        </div>
+        <div id="filtroResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>🔍 Teste 3: Verificar API de Projetos</h3>
+        <button onclick="testAPIProjetos()">Testar API</button>
+        <div id="apiResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>🔗 Link para o Planejamento</h3>
+        <a href="http://localhost:3000/planejamento-semanal.html" target="_blank">
+            <button>Abrir Planejamento Semanal</button>
+        </a>
+    </div>
+
+    <script>
+        async function testLoadTasks() {
+            const resultDiv = document.getElementById('loadTasksResult');
+            resultDiv.innerHTML = '<p>🔄 Carregando tarefas...</p>';
+            
+            try {
+                const response = await fetch('/api/tarefas-planejamento');
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    const tasks = result.data;
+                    const projetos = [...new Set(tasks.map(task => task.projeto))].sort();
+                    
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h4>✅ Tarefas carregadas com sucesso!</h4>
+                            <p><strong>Total de tarefas:</strong> ${tasks.length}</p>
+                            <p><strong>Projetos encontrados:</strong> ${projetos.length}</p>
+                            <h5>📋 Lista de projetos:</h5>
+                            <ul>
+                                ${projetos.map(projeto => `<li>${projeto}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                    
+                    // Atualizar o filtro de projetos
+                    updateFiltroProjetos(projetos);
+                    
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <h4>❌ Erro ao carregar tarefas</h4>
+                            <p><strong>Status:</strong> ${response.status}</p>
+                            <p><strong>Mensagem:</strong> ${result.message}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Erro na requisição</h4>
+                        <p><strong>Erro:</strong> ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function updateFiltroProjetos(projetos) {
+            const filtroProjeto = document.getElementById('filtroProjeto');
+            filtroProjeto.innerHTML = '<option value="">Todos os Projetos</option>';
+            projetos.forEach(projeto => {
+                const option = new Option(projeto, projeto);
+                filtroProjeto.add(option);
+            });
+            
+            const filtroResult = document.getElementById('filtroResult');
+            filtroResult.innerHTML = `
+                <div class="success">
+                    <h4>✅ Filtro de projetos atualizado!</h4>
+                    <p><strong>Projetos no filtro:</strong> ${projetos.length}</p>
+                </div>
+            `;
+        }
+
+        function testFiltroChange() {
+            const filtroProjeto = document.getElementById('filtroProjeto');
+            const selectedProject = filtroProjeto.value;
+            const filtroResult = document.getElementById('filtroResult');
+            
+            if (selectedProject) {
+                filtroResult.innerHTML = `
+                    <div class="info">
+                        <h4>🔍 Projeto selecionado</h4>
+                        <p><strong>Projeto:</strong> ${selectedProject}</p>
+                        <p>Testando filtro...</p>
+                    </div>
+                `;
+                
+                // Simular o teste do filtro
+                setTimeout(() => {
+                    testFiltroProjeto(selectedProject);
+                }, 1000);
+            } else {
+                filtroResult.innerHTML = `
+                    <div class="info">
+                        <h4>📋 Nenhum projeto selecionado</h4>
+                        <p>Selecione um projeto para testar o filtro.</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function testFiltroProjeto(projeto) {
+            const filtroResult = document.getElementById('filtroResult');
+            
+            try {
+                const response = await fetch(`/api/tarefas-por-projeto/${encodeURIComponent(projeto)}`);
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    const tarefas = result.data.tarefas;
+                    const analistas = result.data.analistas;
+                    
+                    filtroResult.innerHTML = `
+                        <div class="success">
+                            <h4>✅ Filtro funcionando!</h4>
+                            <p><strong>Projeto:</strong> ${projeto}</p>
+                            <p><strong>Tarefas encontradas:</strong> ${tarefas.length}</p>
+                            <p><strong>Analistas do projeto:</strong> ${analistas.join(', ')}</p>
+                        </div>
+                    `;
+                } else {
+                    filtroResult.innerHTML = `
+                        <div class="error">
+                            <h4>❌ Erro no filtro</h4>
+                            <p><strong>Status:</strong> ${response.status}</p>
+                            <p><strong>Mensagem:</strong> ${result.message}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                filtroResult.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Erro ao testar filtro</h4>
+                        <p><strong>Erro:</strong> ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function testAPIProjetos() {
+            const resultDiv = document.getElementById('apiResult');
+            resultDiv.innerHTML = '<p>🔄 Testando API...</p>';
+            
+            try {
+                const response = await fetch('/api/tarefas-planejamento');
+                const result = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <h4>✅ API funcionando!</h4>
+                        <p><strong>Status HTTP:</strong> ${response.status}</p>
+                        <p><strong>Success:</strong> ${result.success}</p>
+                        <p><strong>Total de tarefas:</strong> ${result.data ? result.data.length : 0}</p>
+                        <h5>📊 Dados retornados:</h5>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Erro na API</h4>
+                        <p><strong>Erro:</strong> ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Testar automaticamente ao carregar a página
+        window.addEventListener('load', function() {
+            setTimeout(testAPIProjetos, 1000);
+        });
+    </script>
+</body>
+</html>

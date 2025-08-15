@@ -1,0 +1,183 @@
+mindmap
+  root((Dashboard PMO FIERGS))
+    Propósito Principal
+      Sistema de Gestão de Recursos
+      Controle de Capacidade
+      Planejamento Semanal
+      Dashboard PMO
+    Arquitetura do Sistema
+      Backend
+        Node.js + Express
+        MongoDB + JSON Fallback
+        APIs RESTful
+        Processamento Excel/CSV
+      Frontend
+        HTML5 + CSS3 + JavaScript
+        Interface Responsiva
+        Drag & Drop
+        Filtros Inteligentes
+      Banco de Dados
+        MongoDB Principal
+        JSON Fallback
+        Modelos Mongoose
+        Índices Otimizados
+    Funcionalidades Principais
+      Dashboard Geral
+        Estatísticas Tempo Real
+        Visão Geral Projetos
+        Status Analistas
+        Indicadores Performance
+      Planejamento Semanal
+        Drag & Drop Tarefas
+        Filtros Inteligentes
+        Controle Capacidade
+        Salvamento Automático
+      Gestão de Recursos
+        Configuração Capacidades
+        Controle Férias/Faltas
+        Indicadores Sobrecarga
+        Distribuição Automática
+      Processamento de Dados
+        Upload Excel/CSV
+        Processamento Automático
+        Validação Dados
+        Geração Relatórios
+    Fluxo de Dados
+      Entrada de Dados
+        Arquivo Excel/CSV
+        ExcelProcessor
+        Validação
+        MongoDB/JSON
+      Processamento
+        Dados Brutos
+        Parse
+        Estruturação
+        Cálculos
+        Armazenamento
+      Saída
+        API REST
+        Frontend
+        Visualização
+        Interação
+        Salvamento
+    Tecnologias Utilizadas
+      Backend
+        Node.js
+        Express.js
+        Mongoose
+        Multer
+        XLSX
+        Moment.js
+      Frontend
+        HTML5
+        CSS3
+        JavaScript
+        Drag & Drop API
+      Banco de Dados
+        MongoDB
+        JSON
+        Índices Otimizados
+    Estrutura de Arquivos
+      server.js
+      dashboard.html
+      planejamento-semanal.html
+      upload.html
+      package.json
+      config.env
+      models/
+        Tarefa.js
+        Projeto.js
+        Analista.js
+        Sustentacao.js
+        Categoria.js
+        PlanejamentoSemanal.js
+      routes/
+        api.js
+        planejamento.js
+      services/
+        excelProcessor.js
+      scripts/
+        init-database.js
+        init-mongodb.js
+        process-csv.js
+        reprocess-new-csv.js
+      data/
+        dashboard-data.json
+        planejamento-semanal.json
+        analistas-capacidade.json
+      uploads/
+    Casos de Uso
+      Gestor de Projetos
+        Visualizar Status Geral
+        Acompanhar Progresso
+        Identificar Gargalos
+      Analista Técnico
+        Ver Tarefas Atribuídas
+        Acompanhar Prazos
+        Atualizar Status
+      PMO
+        Planejar Alocação Semanal
+        Controlar Capacidade Equipe
+        Gerar Relatórios Performance
+      Administrador
+        Configurar Capacidades
+        Gerenciar Projetos
+        Processar Novos Dados
+    APIs Disponíveis
+      Gestão de Dados
+        GET /api/dashboard-data
+        GET /api/stats
+        POST /api/upload-excel
+      Entidades
+        GET /api/analistas
+        GET /api/projetos
+        GET /api/tarefas
+        GET /api/categorias
+        GET /api/sustentacoes
+      Planejamento
+        POST /api/salvar-planejamento
+        GET /api/carregar-planejamento
+        GET /api/tarefas-planejamento
+        GET /api/tarefas-por-projeto/:id
+      Capacidade
+        GET /api/analistas-capacidade
+        POST /api/analistas-capacidade
+        GET /api/analistas-capacidade-salvas
+    Interface do Usuário
+      Design System
+        Cores Gradiente Azul/Roxo
+        Tipografia Segoe UI
+        Layout Grid Responsivo
+        Componentes Cards/Tabs/Modais
+      Funcionalidades UI
+        Drag & Drop Intuitivo
+        Filtros Dinâmicos
+        Indicadores Visuais
+        Responsividade Mobile
+    Segurança e Confiabilidade
+      Validações
+        Upload Arquivos
+        Dados Entrada
+        Autenticação Futuro
+      Backup e Recuperação
+        Fallback JSON
+        Backup Automático
+        Versionamento
+    Deployment e Manutenção
+      Scripts Inicialização
+        start.bat Windows
+        start.sh Linux/Mac
+        npm start Desenvolvimento
+      Monitoramento
+        Logs Detalhados
+        Tratamento Erros
+        Health Checks
+    Métricas e Indicadores
+      Performance
+        Tempo Resposta APIs
+        Throughput Processamento
+        Disponibilidade Sistema
+      Negócio
+        Capacidade Utilizada
+        Projetos Ativos
+        Tarefas Atrasadas

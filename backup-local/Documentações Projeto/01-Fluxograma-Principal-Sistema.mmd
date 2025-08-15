@@ -1,0 +1,157 @@
+flowchart TD
+    %% INÍCIO DO SISTEMA
+    START([Início do Sistema]) --> INIT[Inicialização do Servidor]
+    INIT --> CONFIG[Carregar Configurações]
+    CONFIG --> MONGODB{Conectar MongoDB?}
+    
+    %% CONEXÃO COM BANCO DE DADOS
+    MONGODB -->|Sucesso| DB_MONGO[(MongoDB)]
+    MONGODB -->|Falha| DB_JSON[(Arquivo JSON)]
+    DB_MONGO --> MIDDLEWARE[Configurar Middleware]
+    DB_JSON --> MIDDLEWARE
+    
+    %% ROTAS PRINCIPAIS
+    MIDDLEWARE --> ROUTES[Configurar Rotas]
+    ROUTES --> SERVER[Servidor Ativo na Porta 3000]
+    
+    %% FLUXO PRINCIPAL DO USUÁRIO
+    SERVER --> USER_ACCESS[Usuário Acessa Sistema]
+    USER_ACCESS --> CHOOSE_PAGE{Qual Página?}
+    
+    %% DASHBOARD PRINCIPAL
+    CHOOSE_PAGE -->|Dashboard| DASHBOARD[Dashboard Principal]
+    DASHBOARD --> LOAD_DASH_DATA[Carregar Dados do Dashboard]
+    LOAD_DASH_DATA --> API_DASH[GET /api/dashboard-data]
+    API_DASH --> DISPLAY_STATS[Exibir Estatísticas]
+    DISPLAY_STATS --> SHOW_PROJECTS[Mostrar Projetos]
+    SHOW_PROJECTS --> SHOW_ANALYSTS[Mostrar Analistas]
+    
+    %% UPLOAD DE ARQUIVOS
+    CHOOSE_PAGE -->|Upload| UPLOAD_PAGE[Página de Upload]
+    UPLOAD_PAGE --> SELECT_FILE[Selecionar Arquivo Excel/CSV]
+    SELECT_FILE --> VALIDATE_FILE{Arquivo Válido?}
+    VALIDATE_FILE -->|Não| ERROR_FILE[Erro: Arquivo Inválido]
+    VALIDATE_FILE -->|Sim| UPLOAD_API[POST /api/upload-excel]
+    
+    %% PROCESSAMENTO DE ARQUIVOS
+    UPLOAD_API --> EXCEL_PROCESSOR[ExcelProcessor]
+    EXCEL_PROCESSOR --> PARSE_CSV[Parsear CSV/Excel]
+    PARSE_CSV --> LOAD_STACKS[Carregar Dados de Stacks]
+    LOAD_STACKS --> PROCESS_DATA[Processar Dados]
+    PROCESS_DATA --> VALIDATE_DATA{Dados Válidos?}
+    VALIDATE_DATA -->|Não| ERROR_DATA[Erro: Dados Inválidos]
+    VALIDATE_DATA -->|Sim| SAVE_DATA[Salvar Dados]
+    
+    %% SALVAMENTO DE DADOS
+    SAVE_DATA --> SAVE_MONGO{MongoDB Disponível?}
+    SAVE_MONGO -->|Sim| SAVE_TO_MONGO[Salvar no MongoDB]
+    SAVE_MONGO -->|Não| SAVE_TO_JSON[Salvar em JSON]
+    SAVE_TO_MONGO --> SUCCESS_SAVE[Dados Salvos com Sucesso]
+    SAVE_TO_JSON --> SUCCESS_SAVE
+    SUCCESS_SAVE --> CLEANUP[Limpar Arquivo Temporário]
+    
+    %% PLANEJAMENTO SEMANAL
+    CHOOSE_PAGE -->|Planejamento| PLANNING_PAGE[Página de Planejamento]
+    PLANNING_PAGE --> INIT_PLANNING[Inicializar Planejamento]
+    INIT_PLANNING --> LOAD_TASKS[Carregar Tarefas]
+    LOAD_TASKS --> API_TASKS[GET /api/tarefas-planejamento]
+    API_TASKS --> LOAD_ANALYSTS[Carregar Analistas]
+    LOAD_ANALYSTS --> API_ANALYSTS[GET /api/analistas]
+    
+    %% FILTROS DO PLANEJAMENTO
+    LOAD_ANALYSTS --> APPLY_FILTERS[Aplicar Filtros]
+    APPLY_FILTERS --> FILTER_TYPE{Tipo de Filtro?}
+    FILTER_TYPE -->|Por Analista| FILTER_ANALYST[Filtrar por Analista]
+    FILTER_TYPE -->|Por Projeto| FILTER_PROJECT[Filtrar por Projeto]
+    FILTER_TYPE -->|Por Data| FILTER_DATE[Filtrar por Data]
+    FILTER_TYPE -->|Por Tipo| FILTER_DEMAND[Filtrar por Tipo de Demanda]
+    
+    %% DRAG & DROP
+    FILTER_ANALYST --> RENDER_CALENDAR[Renderizar Calendário]
+    FILTER_PROJECT --> RENDER_CALENDAR
+    FILTER_DATE --> RENDER_CALENDAR
+    FILTER_DEMAND --> RENDER_CALENDAR
+    
+    RENDER_CALENDAR --> DRAG_DROP[Interface Drag & Drop]
+    DRAG_DROP --> MOVE_TASK[Mover Tarefa]
+    MOVE_TASK --> CHECK_CAPACITY{Verificar Capacidade}
+    CHECK_CAPACITY -->|OK| UPDATE_PLANNING[Atualizar Planejamento]
+    CHECK_CAPACITY -->|Excedida| WARNING_CAPACITY[Aviso de Sobrecarga]
+    WARNING_CAPACITY --> UPDATE_PLANNING
+    
+    %% SALVAMENTO DO PLANEJAMENTO
+    UPDATE_PLANNING --> UNSAVED_CHANGES[Mudanças Não Salvas]
+    UNSAVED_CHANGES --> SAVE_PLANNING[Salvar Planejamento]
+    SAVE_PLANNING --> API_SAVE_PLAN[POST /api/salvar-planejamento]
+    API_SAVE_PLAN --> SAVE_TO_FILE[Salvar em JSON]
+    SAVE_TO_FILE --> SUCCESS_PLANNING[Planejamento Salvo]
+    
+    %% CARREGAMENTO DE PLANEJAMENTO
+    SUCCESS_PLANNING --> LOAD_SAVED[Carregar Planejamento Salvo]
+    LOAD_SAVED --> API_LOAD_PLAN[GET /api/carregar-planejamento]
+    API_LOAD_PLAN --> RESTORE_PLANNING[Restaurar Planejamento]
+    RESTORE_PLANNING --> RENDER_CALENDAR
+    
+    %% CONFIGURAÇÃO DE CAPACIDADE
+    CHOOSE_PAGE -->|Configuração| CAPACITY_CONFIG[Configurar Capacidades]
+    CAPACITY_CONFIG --> SET_ANALYST[Definir Analista]
+    SET_ANALYST --> SET_CAPACITY[Definir Capacidade]
+    SET_CAPACITY --> SET_REASON[Definir Motivo]
+    SET_REASON --> SAVE_CAPACITY[Salvar Configuração]
+    SAVE_CAPACITY --> API_CAPACITY[POST /api/analistas-capacidade]
+    API_CAPACITY --> SUCCESS_CAPACITY[Capacidade Configurada]
+    
+    %% APIS DE CONSULTA
+    CHOOSE_PAGE -->|APIs| API_CONSULT[Consultar APIs]
+    API_CONSULT --> API_CHOICE{Qual API?}
+    API_CHOICE -->|Projetos| API_PROJECTS[GET /api/projetos]
+    API_CHOICE -->|Analistas| API_ANALYSTS_LIST[GET /api/analistas]
+    API_CHOICE -->|Tarefas| API_TASKS_LIST[GET /api/tarefas]
+    API_CHOICE -->|Categorias| API_CATEGORIES[GET /api/categorias]
+    API_CHOICE -->|Sustentações| API_SUSTENTATIONS[GET /api/sustentacoes]
+    API_CHOICE -->|Estatísticas| API_STATS[GET /api/stats]
+    
+    %% PROCESSAMENTO DE DADOS
+    API_PROJECTS --> PROCESS_PROJECTS[Processar Projetos]
+    API_ANALYSTS_LIST --> PROCESS_ANALYSTS[Processar Analistas]
+    API_TASKS_LIST --> PROCESS_TASKS[Processar Tarefas]
+    API_CATEGORIES --> PROCESS_CATEGORIES[Processar Categorias]
+    API_SUSTENTATIONS --> PROCESS_SUSTENTATIONS[Processar Sustentações]
+    API_STATS --> PROCESS_STATS[Processar Estatísticas]
+    
+    %% RETORNO DOS DADOS
+    PROCESS_PROJECTS --> RETURN_DATA[Retornar Dados]
+    PROCESS_ANALYSTS --> RETURN_DATA
+    PROCESS_TASKS --> RETURN_DATA
+    PROCESS_CATEGORIES --> RETURN_DATA
+    PROCESS_SUSTENTATIONS --> RETURN_DATA
+    PROCESS_STATS --> RETURN_DATA
+    
+    %% FLUXO DE ERROS
+    ERROR_FILE --> ERROR_HANDLER[Tratamento de Erro]
+    ERROR_DATA --> ERROR_HANDLER
+    WARNING_CAPACITY --> ERROR_HANDLER
+    ERROR_HANDLER --> USER_NOTIFICATION[Notificar Usuário]
+    
+    %% FIM DOS FLUXOS
+    DISPLAY_STATS --> END_DASHBOARD[Fim - Dashboard]
+    SUCCESS_SAVE --> END_UPLOAD[Fim - Upload]
+    SUCCESS_PLANNING --> END_PLANNING[Fim - Planejamento]
+    SUCCESS_CAPACITY --> END_CAPACITY[Fim - Capacidade]
+    RETURN_DATA --> END_API[Fim - API]
+    USER_NOTIFICATION --> END_ERROR[Fim - Erro]
+    
+    %% ESTILOS
+    classDef startEnd fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef process fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef decision fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef database fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
+    classDef api fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    classDef error fill:#ffebee,stroke:#c62828,stroke-width:2px
+    
+    class START,END_DASHBOARD,END_UPLOAD,END_PLANNING,END_CAPACITY,END_API,END_ERROR startEnd
+    class INIT,CONFIG,MIDDLEWARE,ROUTES,SERVER,UPLOAD_PAGE,DASHBOARD,PLANNING_PAGE,CAPACITY_CONFIG process
+    class MONGODB,VALIDATE_FILE,VALIDATE_DATA,SAVE_MONGO,CHECK_CAPACITY,FILTER_TYPE,API_CHOICE decision
+    class DB_MONGO,DB_JSON database
+    class API_DASH,UPLOAD_API,API_TASKS,API_ANALYSTS,API_SAVE_PLAN,API_LOAD_PLAN,API_CAPACITY,API_PROJECTS,API_ANALYSTS_LIST,API_TASKS_LIST,API_CATEGORIES,API_SUSTENTATIONS,API_STATS api
+    class ERROR_FILE,ERROR_DATA,WARNING_CAPACITY,ERROR_HANDLER error

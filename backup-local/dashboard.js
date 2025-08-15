@@ -171,189 +171,20 @@ async function carregarDadosDoJSONFile() {
         const response = await fetch('http://localhost:3000/data/dashboard-data.json');
         const data = await response.json();
         
-        // Processar analistas por função a partir dos dados existentes
-        const analistasPorFuncao = processarAnalistasPorFuncao(data);
-        
         dadosCompletos = {
             projetos: data.projetos || [],
             analistas: data.analistas || [],
             categorias: data.categorias || [],
             sustentacoes: data.sustentacoes || [],
             tarefas: data.tarefas || [],
-            analistasPorFuncao: analistasPorFuncao
+            analistasPorFuncao: data.analistasPorFuncao || {}
         };
         
         console.log('✅ Dados carregados do arquivo JSON');
-        console.log('📊 Analistas por função:', analistasPorFuncao);
     } catch (error) {
         console.error('❌ Erro ao carregar dados do JSON:', error);
         throw error;
     }
-}
-
-// Função para validar se um nome é realmente um analista
-function isValidAnalystName(name) {
-    if (!name || typeof name !== 'string') return false;
-    
-    // Filtrar códigos de tarefa (como BACKLOGSGE-39)
-    if (name.includes('-') && /[A-Z]+\d+/.test(name)) return false;
-    
-    // Filtrar valores de erro do Excel
-    if (name.includes('#VALOR!') || name.includes('#N/A')) return false;
-    
-    // Filtrar nomes muito curtos (provavelmente códigos)
-    if (name.length < 3) return false;
-    
-    // Filtrar nomes que contêm apenas números
-    if (/^\d+$/.test(name)) return false;
-    
-    return true;
-}
-
-// Função para enriquecer dados dos analistas com informações das tarefas
-function enriquecerDadosAnalistas(analistasPorFuncao, data) {
-    Object.keys(analistasPorFuncao).forEach(funcao => {
-        analistasPorFuncao[funcao].forEach(analista => {
-            // Encontrar tarefas do analista
-            const tarefasDoAnalista = data.tarefas.filter(tarefa => 
-                tarefa.responsavel === analista.nome
-            );
-            
-            // Calcular estatísticas
-            analista.tarefasAtivas = tarefasDoAnalista.filter(t => 
-                t.status !== 'Concluída' && t.status !== 'Produção'
-            ).length;
-            
-            // Encontrar data final da última tarefa
-            const tarefasComData = tarefasDoAnalista.filter(t => t.dataFinal);
-            if (tarefasComData.length > 0) {
-                const datasFinais = tarefasComData.map(t => new Date(t.dataFinal));
-                analista.dataFinalUltimaTarefa = new Date(Math.max(...datasFinais)).toISOString().split('T')[0];
-            }
-            
-            // Encontrar projetos do analista
-            const projetosDoAnalista = data.projetos.filter(projeto => 
-                projeto.analistas && projeto.analistas.includes(analista.nome)
-            );
-            analista.projetos = projetosDoAnalista.map(p => p.nome);
-            
-            // Encontrar sustentações do analista
-            const sustentacoesDoAnalista = data.sustentacoes.filter(sustentacao => 
-                sustentacao.analistas && sustentacao.analistas.includes(analista.nome)
-            );
-            analista.sustentacoes = sustentacoesDoAnalista.map(s => s.nome);
-            
-            // Calcular total de projetos e sustentações
-            analista.totalProjetos = analista.projetos.length;
-            analista.totalSustentacoes = analista.sustentacoes.length;
-        });
-    });
-    
-    return analistasPorFuncao;
-}
-
-// Função para processar analistas por função
-function processarAnalistasPorFuncao(data) {
-    const analistasPorFuncao = {
-        'Analista Técnico': [],
-        'Analista de Negócio': [],
-        'Responsável Técnico': []
-    };
-    
-    // Extrair analistas únicos dos projetos
-    const analistasUnicos = new Set();
-    
-    // Adicionar analistas dos projetos
-    if (data.projetos) {
-        data.projetos.forEach(projeto => {
-            if (projeto.analistas) {
-                projeto.analistas.forEach(analista => {
-                    // Filtrar nomes que não são analistas (como códigos de tarefa)
-                    if (!isValidAnalystName(analista)) {
-                        return;
-                    }
-                    analistasUnicos.add(analista);
-                });
-            }
-        });
-    }
-    
-    // Adicionar analistas das sustentações
-    if (data.sustentacoes) {
-        data.sustentacoes.forEach(sustentacao => {
-            if (sustentacao.analistas) {
-                sustentacao.analistas.forEach(analista => {
-                    // Filtrar nomes que não são analistas (como códigos de tarefa)
-                    if (!isValidAnalystName(analista)) {
-                        return;
-                    }
-                    analistasUnicos.add(analista);
-                });
-            }
-        });
-    }
-    
-    // Classificar analistas por função baseado na planilha Stacks e Squads
-    analistasUnicos.forEach(analista => {
-        const analistaObj = {
-            nome: analista,
-            categoria: 'Java', // Categoria padrão
-            squad: 'Squad Digital', // Squad padrão
-            stacks: [],
-            funcoes: [],
-            dataFinalUltimaTarefa: null,
-            tarefasAtivas: 0,
-            projetos: [],
-            sustentacoes: [],
-            totalProjetos: 0,
-            totalSustentacoes: 0
-        };
-        
-        // Determinar função baseado na planilha Stacks e Squads
-        // Analistas de Negócio (PO, PMO, etc.)
-        if (analista.toLowerCase().includes('po') || 
-            analista.toLowerCase().includes('product owner') ||
-            analista.toLowerCase().includes('negócio') ||
-            analista.toLowerCase().includes('gisele') ||
-            analista.toLowerCase().includes('guilherme polano') ||
-            analista.toLowerCase().includes('fernando grauer') ||
-            analista.toLowerCase().includes('andre batista') ||
-            analista.toLowerCase().includes('kamila') ||
-            analista.toLowerCase().includes('alex melo') ||
-            analista.toLowerCase().includes('pmo')) {
-            analistaObj.funcoes = ['Analista de Negócio'];
-            analistasPorFuncao['Analista de Negócio'].push(analistaObj);
-        } 
-        // Responsáveis Técnicos (Arquitetura, Tech Lead, etc.)
-        else if (analista.toLowerCase().includes('responsável') ||
-                   analista.toLowerCase().includes('responsavel') ||
-                   analista.toLowerCase().includes('tech lead') ||
-                   analista.toLowerCase().includes('arquiteto') ||
-                   analista.toLowerCase().includes('maike') ||
-                   analista.toLowerCase().includes('roberto') ||
-                   analista.toLowerCase().includes('william') ||
-                   analista.toLowerCase().includes('eduardo souza') ||
-                   analista.toLowerCase().includes('anderson souza') ||
-                   analista.toLowerCase().includes('rafael kempfer')) {
-            analistaObj.funcoes = ['Responsável Técnico'];
-            analistasPorFuncao['Responsável Técnico'].push(analistaObj);
-        } 
-        // Por padrão, considerar como Analista Técnico
-        else {
-            analistaObj.funcoes = ['Analista Técnico'];
-            analistasPorFuncao['Analista Técnico'].push(analistaObj);
-        }
-    });
-    
-    // Enriquecer dados dos analistas
-    enriquecerDadosAnalistas(analistasPorFuncao, data);
-    
-    console.log(`📊 Analistas processados: ${analistasUnicos.size} total`);
-    console.log(`  - Analistas Técnicos: ${analistasPorFuncao['Analista Técnico'].length}`);
-    console.log(`  - Analistas de Negócio: ${analistasPorFuncao['Analista de Negócio'].length}`);
-    console.log(`  - Responsáveis Técnicos: ${analistasPorFuncao['Responsável Técnico'].length}`);
-    
-    return analistasPorFuncao;
 }
 
 // Função para carregar tarefas dos analistas para o planejamento semanal
@@ -487,12 +318,7 @@ function loadProjects() {
     grid.innerHTML = '<div class="loading">Carregando projetos...</div>';
     
     setTimeout(() => {
-        // Ordenar projetos por nome (ordem alfabética)
-        const projetosOrdenados = dadosCompletos.projetos.sort((a, b) => 
-            a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' })
-        );
-        
-        grid.innerHTML = projetosOrdenados.map(projeto => `
+        grid.innerHTML = dadosCompletos.projetos.map(projeto => `
             <div class="card" onclick="showProjectDetails('${projeto.nome}')" data-status="${projeto.status}" data-squad="${projeto.squad}">
                 <div class="card-header">
                     <div class="card-title">${projeto.nome}</div>
@@ -544,12 +370,7 @@ function loadAnalystsByType(tipoAnalista) {
     grid.innerHTML = '<div class="loading">Carregando analistas...</div>';
     
     setTimeout(() => {
-        // Ordenar analistas por nome (ordem alfabética)
-        const analistasOrdenados = analistas.sort((a, b) => 
-            a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' })
-        );
-        
-        grid.innerHTML = analistasOrdenados.map(analista => {
+        grid.innerHTML = analistas.map(analista => {
             const disponivel = isAvailable(analista.dataFinalUltimaTarefa);
             const statusClass = disponivel ? 'status-disponivel' : 'status-ocupado';
             const statusText = disponivel ? 'Disponível' : 'Ocupado';
@@ -565,7 +386,7 @@ function loadAnalystsByType(tipoAnalista) {
                     <div class="card-info"><strong>Disponível em:</strong> ${formatDate(analista.dataFinalUltimaTarefa)}</div>
                     <div class="card-meta">
                         <div class="meta-item">
-                            <div class="meta-value">${analista.totalProjetos || analista.projetos.length}</div>
+                            <div class="meta-value">${analista.projetos.length}</div>
                             <div class="meta-label">Projetos</div>
                         </div>
                         <div class="meta-item">
@@ -600,20 +421,9 @@ function loadCategories() {
                 totaisPorFuncao[funcao] = analistas.reduce((total, analista) => total + analista.projetos.length, 0);
             });
             
-            // Ordenar funções alfabeticamente
-            const funcoesOrdenadas = Object.entries(dadosCompletos.analistasPorFuncao).sort((a, b) => 
-                a[0].localeCompare(b[0], 'pt-BR', { sensitivity: 'base' })
-            );
-            
-            funcoesOrdenadas.forEach(([funcao, analistas]) => {
+            Object.entries(dadosCompletos.analistasPorFuncao).forEach(([funcao, analistas]) => {
                 if (analistas.length > 0) {
                     const totalProjetos = totaisPorFuncao[funcao];
-                    
-                    // Ordenar analistas por nome dentro de cada função
-                    const analistasOrdenados = analistas.sort((a, b) => 
-                        a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' })
-                    );
-                    
                     html += `
                         <div class="category-section" data-category="${funcao}">
                             <div class="category-header">
@@ -621,7 +431,7 @@ function loadCategories() {
                                 <div class="category-count">${analistas.length} analistas • ${totalProjetos} projetos</div>
                             </div>
                             <div class="team-grid">
-                                ${analistasOrdenados.map(analista => {
+                                ${analistas.map(analista => {
                                     const disponivel = isAvailable(analista.dataFinalUltimaTarefa);
                                     const statusClass = disponivel ? 'status-disponivel' : 'status-ocupado';
                                     const statusText = disponivel ? 'Disponível' : 'Ocupado';
@@ -649,45 +459,33 @@ function loadCategories() {
         // Adicionar seção de categorias técnicas
         html += '<div class="section-title" style="margin: 30px 0 20px 0; font-size: 1.5em; color: #2c3e50;">🔧 Categorias Técnicas</div>';
         
-        // Ordenar categorias por nome
-        const categoriasOrdenadas = dadosCompletos.categorias.sort((a, b) => 
-            a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' })
-        );
-        
-        html += categoriasOrdenadas.map(categoria => {
-            // Ordenar analistas dentro de cada categoria
-            const analistasOrdenados = categoria.analistas.sort((a, b) => 
-                a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' })
-            );
-            
-            return `
-                <div class="category-section" data-category="${categoria.nome}">
-                    <div class="category-header">
-                        <div class="category-title">🔧 ${categoria.nome}</div>
-                        <div class="category-count">${categoria.analistas.length} analistas</div>
-                    </div>
-                    <div class="team-grid">
-                        ${analistasOrdenados.map(analista => {
-                            const disponivel = isAvailable(analista.dataFinal);
-                            const statusClass = disponivel ? 'status-disponivel' : 'status-ocupado';
-                            const statusText = disponivel ? 'Disponível' : 'Ocupado';
-                            
-                            return `
-                                <div class="team-member" onclick="showAnalystDetails('${analista.nome}')">
-                                    <div class="member-name">${analista.nome}</div>
-                                    <div class="member-role">${categoria.nome} Developer</div>
-                                    <div class="member-status ${statusClass}">${statusText}</div>
-                                    <div style="margin-top: 8px; font-size: 0.85em; color: #7f8c8d;">
-                                        <strong>Disponível:</strong> ${formatDate(analista.dataFinal)}<br>
-                                        <strong>Tarefas:</strong> ${analista.tarefas}
-                                    </div>
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
+        html += dadosCompletos.categorias.map(categoria => `
+            <div class="category-section" data-category="${categoria.nome}">
+                <div class="category-header">
+                    <div class="category-title">🔧 ${categoria.nome}</div>
+                    <div class="category-count">${categoria.analistas.length} analistas</div>
                 </div>
-            `;
-        }).join('');
+                <div class="team-grid">
+                    ${categoria.analistas.map(analista => {
+                        const disponivel = isAvailable(analista.dataFinal);
+                        const statusClass = disponivel ? 'status-disponivel' : 'status-ocupado';
+                        const statusText = disponivel ? 'Disponível' : 'Ocupado';
+                        
+                        return `
+                            <div class="team-member" onclick="showAnalystDetails('${analista.nome}')">
+                                <div class="member-name">${analista.nome}</div>
+                                <div class="member-role">${categoria.nome} Developer</div>
+                                <div class="member-status ${statusClass}">${statusText}</div>
+                                <div style="margin-top: 8px; font-size: 0.85em; color: #7f8c8d;">
+                                    <strong>Disponível:</strong> ${formatDate(analista.dataFinal)}<br>
+                                    <strong>Tarefas:</strong> ${analista.tarefas}
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        `).join('');
         
         container.innerHTML = html;
     }, 500);
@@ -698,12 +496,7 @@ function loadSustentacoes() {
     grid.innerHTML = '<div class="loading">Carregando sustentações...</div>';
     
     setTimeout(() => {
-        // Ordenar sustentações por nome (ordem alfabética)
-        const sustentacoesOrdenadas = dadosCompletos.sustentacoes.sort((a, b) => 
-            a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' })
-        );
-        
-        grid.innerHTML = sustentacoesOrdenadas.map(sustentacao => `
+        grid.innerHTML = dadosCompletos.sustentacoes.map(sustentacao => `
             <div class="card" onclick="showSustentacaoDetails('${sustentacao.nome}')" data-status="${sustentacao.status}" data-squad="${sustentacao.squad}">
                 <div class="card-header">
                     <div class="card-title">${sustentacao.nome}</div>

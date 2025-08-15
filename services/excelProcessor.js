@@ -204,7 +204,7 @@ class ExcelProcessor {
                 // Processar projeto - apenas se NÃO for sustentação
                 if (tarefa.projeto && !projetosMap.has(tarefa.projeto) && !isSustentacao) {
                     projetosMap.set(tarefa.projeto, {
-                        nome: tarefa.projeto,
+                            nome: tarefa.projeto,
                         po: tarefa.relator,
                         squad: tarefa.squad,
                         dataInicio: tarefa.dataInicial,
@@ -368,15 +368,15 @@ class ExcelProcessor {
                         
                         // Adicionar sustentação à lista de projetos do analista se não existir
                         if (!analista.projetos.includes(tarefa.projeto)) {
-                            analista.projetos.push(tarefa.projeto);
-                        }
-                        
+                        analista.projetos.push(tarefa.projeto);
+                    }
+                    
                         // Atualizar data final da última tarefa (mais recente)
                         if (tarefa.dataFinal && (!analista.dataFinalUltimaTarefa || tarefa.dataFinal > analista.dataFinalUltimaTarefa)) {
                             analista.dataFinalUltimaTarefa = tarefa.dataFinal;
                         }
                     }
-
+                    
                     // Contar tarefa para o relator da sustentação (se diferente do responsável)
                     if (analistasMapCaseInsensitive.has(tarefa.relator.toLowerCase()) && tarefa.relator !== tarefa.responsavel) {
                         const analista = analistasMapCaseInsensitive.get(tarefa.relator.toLowerCase());

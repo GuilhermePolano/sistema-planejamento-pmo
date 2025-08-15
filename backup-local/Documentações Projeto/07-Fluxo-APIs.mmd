@@ -1,0 +1,47 @@
+flowchart TD
+    API_REQUEST([Requisição API]) --> ROUTE_MATCH{Qual Rota?}
+    ROUTE_MATCH -->|Dashboard Data| GET_DASHBOARD_DATA[GET /api/dashboard-data]
+    ROUTE_MATCH -->|Upload Excel| POST_UPLOAD_EXCEL[POST /api/upload-excel]
+    ROUTE_MATCH -->|Analistas| GET_ANALYSTS[GET /api/analistas]
+    ROUTE_MATCH -->|Projetos| GET_PROJECTS[GET /api/projetos]
+    ROUTE_MATCH -->|Tarefas| GET_TASKS[GET /api/tarefas]
+    ROUTE_MATCH -->|Planejamento| GET_PLANNING[GET /api/tarefas-planejamento]
+    ROUTE_MATCH -->|Salvar Planejamento| POST_SAVE_PLANNING[POST /api/salvar-planejamento]
+    ROUTE_MATCH -->|Capacidade| GET_CAPACITY[GET /api/analistas-capacidade]
+    
+    GET_DASHBOARD_DATA --> READ_JSON[Ler JSON]
+    POST_UPLOAD_EXCEL --> PROCESS_EXCEL[Processar Excel]
+    GET_ANALYSTS --> QUERY_ANALYSTS[Consultar Analistas]
+    GET_PROJECTS --> QUERY_PROJECTS[Consultar Projetos]
+    GET_TASKS --> QUERY_TASKS[Consultar Tarefas]
+    GET_PLANNING --> QUERY_PLANNING[Consultar Planejamento]
+    POST_SAVE_PLANNING --> SAVE_PLANNING_DATA[Salvar Dados]
+    GET_CAPACITY --> QUERY_CAPACITY[Consultar Capacidade]
+    
+    READ_JSON --> RETURN_JSON[Retornar JSON]
+    PROCESS_EXCEL --> RETURN_PROCESSED[Retornar Processado]
+    QUERY_ANALYSTS --> RETURN_ANALYSTS[Retornar Analistas]
+    QUERY_PROJECTS --> RETURN_PROJECTS[Retornar Projetos]
+    QUERY_TASKS --> RETURN_TASKS[Retornar Tarefas]
+    QUERY_PLANNING --> RETURN_PLANNING[Retornar Planejamento]
+    SAVE_PLANNING_DATA --> RETURN_SAVED[Retornar Salvo]
+    QUERY_CAPACITY --> RETURN_CAPACITY[Retornar Capacidade]
+    
+    RETURN_JSON --> API_RESPONSE[Resposta da API]
+    RETURN_PROCESSED --> API_RESPONSE
+    RETURN_ANALYSTS --> API_RESPONSE
+    RETURN_PROJECTS --> API_RESPONSE
+    RETURN_TASKS --> API_RESPONSE
+    RETURN_PLANNING --> API_RESPONSE
+    RETURN_SAVED --> API_RESPONSE
+    RETURN_CAPACITY --> API_RESPONSE
+    
+    classDef startEnd fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef process fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef decision fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef api fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    
+    class API_REQUEST,API_RESPONSE startEnd
+    class READ_JSON,PROCESS_EXCEL,QUERY_ANALYSTS,QUERY_PROJECTS,QUERY_TASKS,QUERY_PLANNING,SAVE_PLANNING_DATA,QUERY_CAPACITY,RETURN_JSON,RETURN_PROCESSED,RETURN_ANALYSTS,RETURN_PROJECTS,RETURN_TASKS,RETURN_PLANNING,RETURN_SAVED,RETURN_CAPACITY process
+    class ROUTE_MATCH decision
+    class GET_DASHBOARD_DATA,POST_UPLOAD_EXCEL,GET_ANALYSTS,GET_PROJECTS,GET_TASKS,GET_PLANNING,POST_SAVE_PLANNING,GET_CAPACITY api

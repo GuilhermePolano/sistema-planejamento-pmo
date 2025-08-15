@@ -1,0 +1,27 @@
+flowchart TD
+    DASHBOARD_START([Acesso ao Dashboard]) --> LOAD_DASHBOARD_DATA[Carregar Dados]
+    LOAD_DASHBOARD_DATA --> API_CALL[GET /api/dashboard-data]
+    API_CALL --> DATA_AVAILABLE{Dados Disponíveis?}
+    DATA_AVAILABLE -->|Não| SHOW_ERROR[Mostrar Erro]
+    DATA_AVAILABLE -->|Sim| PROCESS_DATA[Processar Dados]
+    PROCESS_DATA --> CALCULATE_STATS[Calcular Estatísticas]
+    CALCULATE_STATS --> DISPLAY_OVERVIEW[Exibir Visão Geral]
+    DISPLAY_OVERVIEW --> SHOW_PROJECTS[Mostrar Projetos]
+    SHOW_PROJECTS --> SHOW_ANALYSTS[Mostrar Analistas]
+    SHOW_ANALYSTS --> SHOW_TASKS[Mostrar Tarefas]
+    SHOW_TASKS --> SHOW_CATEGORIES[Mostrar Categorias]
+    SHOW_CATEGORIES --> INTERACTIVE_DASHBOARD[Dashboard Interativo]
+    INTERACTIVE_DASHBOARD --> USER_ACTIONS[Ações do Usuário]
+    USER_ACTIONS --> NAVIGATE_TO_PLANNING[Navegar para Planejamento]
+    USER_ACTIONS --> NAVIGATE_TO_UPLOAD[Navegar para Upload]
+    USER_ACTIONS --> NAVIGATE_TO_CONFIG[Navegar para Configuração]
+    
+    classDef startEnd fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef process fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef decision fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef error fill:#ffebee,stroke:#c62828,stroke-width:2px
+    
+    class DASHBOARD_START,NAVIGATE_TO_PLANNING,NAVIGATE_TO_UPLOAD,NAVIGATE_TO_CONFIG startEnd
+    class LOAD_DASHBOARD_DATA,API_CALL,PROCESS_DATA,CALCULATE_STATS,DISPLAY_OVERVIEW,SHOW_PROJECTS,SHOW_ANALYSTS,SHOW_TASKS,SHOW_CATEGORIES,INTERACTIVE_DASHBOARD,USER_ACTIONS process
+    class DATA_AVAILABLE decision
+    class SHOW_ERROR error

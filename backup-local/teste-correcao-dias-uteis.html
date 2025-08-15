@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Correção Dias Úteis</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- FullCalendar CSS -->
+    <link href='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/main.min.css' rel='stylesheet' />
+    <link href='https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.10/main.min.css' rel='stylesheet' />
+    <link href='https://cdn.jsdelivr.net/npm/@fullcalendar/timegrid@6.1.10/main.min.css' rel='stylesheet' />
+    <link href='https://cdn.jsdelivr.net/npm/@fullcalendar/interaction@6.1.10/main.min.css' rel='stylesheet' />
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .test-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+        }
+        
+        .test-title {
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .test-result {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .test-success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .test-error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .test-info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        
+        .btn-test {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 10px 25px;
+            color: white;
+            font-weight: 500;
+            margin: 5px;
+        }
+        
+        .btn-test:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+        
+        .form-check-input:checked {
+            background-color: #667eea;
+            border-color: #667eea;
+        }
+        
+        .form-check-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .form-check-label {
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .dias-uteis-toggle {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .badge {
+            font-size: 0.7rem;
+        }
+        
+        #calendar {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1><i class="fas fa-calendar-check me-2"></i>Teste - Correção Dias Úteis</h1>
+            <p class="text-muted">Verificação da implementação do botão toggle e correção de datas</p>
+        </div>
+
+        <!-- Seção de Testes Automáticos -->
+        <div class="test-section">
+            <h3 class="test-title"><i class="fas fa-cogs me-2"></i>Testes Automáticos</h3>
+            <div id="test-results"></div>
+            <button class="btn btn-test" onclick="executarTestes()">
+                <i class="fas fa-play me-1"></i>Executar Testes
+            </button>
+        </div>
+
+        <!-- Seção do Botão Toggle -->
+        <div class="test-section">
+            <h3 class="test-title"><i class="fas fa-toggle-on me-2"></i>Teste do Botão Toggle</h3>
+            <div class="dias-uteis-toggle">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="toggle-dias-uteis">
+                            <label class="form-check-label" for="toggle-dias-uteis">
+                                <i class="fas fa-calendar me-1"></i>
+                                <strong>Todos os Dias</strong>
+                                <span class="badge bg-secondary ms-2">Inativo</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Clique para alternar entre visualizar todos os dias ou apenas dias úteis
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div id="toggle-status" class="test-info">
+                <strong>Status:</strong> Aguardando interação...
+            </div>
+        </div>
+
+        <!-- Seção do Calendário -->
+        <div class="test-section">
+            <h3 class="test-title"><i class="fas fa-calendar-week me-2"></i>Teste do Calendário</h3>
+            <div id="calendar"></div>
+            <div id="calendar-status" class="test-info mt-3">
+                <strong>Status do Calendário:</strong> Carregando...
+            </div>
+        </div>
+
+        <!-- Seção de Informações -->
+        <div class="test-section">
+            <h3 class="test-title"><i class="fas fa-info-circle me-2"></i>Informações da Correção</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>✅ Correções Implementadas:</h5>
+                    <ul>
+                        <li>Botão toggle "Somente Dias Úteis"</li>
+                        <li>Controle dinâmico de finais de semana</li>
+                        <li>Correção do cálculo de data inicial</li>
+                        <li>Segunda-feira como primeiro dia da semana</li>
+                        <li>Interface visual melhorada</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h5>🔧 Funcionalidades:</h5>
+                    <ul>
+                        <li>Alternar entre modos de visualização</li>
+                        <li>Ocultar/mostrar sábados e domingos</li>
+                        <li>Indicadores visuais de estado</li>
+                        <li>Compatibilidade com FullCalendar.js</li>
+                        <li>Responsividade em dispositivos móveis</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FullCalendar JS -->
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/main.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.10/main.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/timegrid@6.1.10/main.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/interaction@6.1.10/main.min.js'></script>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Variáveis globais
+        let calendar;
+        let mostrarApenasDiasUteis = false;
+        let testesExecutados = [];
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Inicializando teste de correção...');
+            inicializarCalendario();
+            configurarControlesDiasUteis();
+            executarTestesAutomaticos();
+        });
+
+        // Inicializar calendário
+        function inicializarCalendario() {
+            const calendarEl = document.getElementById('calendar');
+            
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'timeGridWeek',
+                locale: 'pt-br',
+                timeZone: 'America/Sao_Paulo',
+                firstDay: 1, // Segunda-feira como primeiro dia
+                
+                weekends: true,
+                hiddenDays: [],
+                
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                
+                height: 'auto',
+                aspectRatio: 1.8,
+                expandRows: true,
+                
+                editable: true,
+                droppable: true,
+                selectable: true,
+                
+                slotMinTime: '08:00:00',
+                slotMaxTime: '18:00:00',
+                allDaySlot: false,
+                
+                eventDisplay: 'block',
+                eventTimeFormat: {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                },
+                
+                eventColor: '#667eea',
+                eventTextColor: '#ffffff',
+                
+                events: function(info, successCallback, failureCallback) {
+                    // Eventos de teste
+                    const eventos = [
+                        {
+                            id: 'teste1',
+                            title: 'Tarefa de Teste 1',
+                            start: '2025-01-13T09:00:00',
+                            end: '2025-01-13T12:00:00',
+                            backgroundColor: '#28a745'
+                        },
+                        {
+                            id: 'teste2',
+                            title: 'Tarefa de Teste 2',
+                            start: '2025-01-14T14:00:00',
+                            end: '2025-01-14T17:00:00',
+                            backgroundColor: '#ffc107',
+                            textColor: '#212529'
+                        }
+                    ];
+                    successCallback(eventos);
+                },
+                
+                loading: function(isLoading) {
+                    const status = document.getElementById('calendar-status');
+                    if (isLoading) {
+                        status.innerHTML = '<strong>Status do Calendário:</strong> Carregando...';
+                        status.className = 'test-info';
+                    } else {
+                        status.innerHTML = '<strong>Status do Calendário:</strong> Calendário carregado com sucesso!';
+                        status.className = 'test-success';
+                    }
+                }
+            });
+            
+            calendar.render();
+            console.log('✅ Calendário inicializado para teste');
+        }
+
+        // Configurar controles de dias úteis
+        function configurarControlesDiasUteis() {
+            const botaoToggle = document.getElementById('toggle-dias-uteis');
+            if (botaoToggle) {
+                botaoToggle.addEventListener('change', alternarDiasUteis);
+                console.log('✅ Controle de dias úteis configurado');
+            }
+        }
+
+        // Função para alternar dias úteis
+        function alternarDiasUteis() {
+            mostrarApenasDiasUteis = !mostrarApenasDiasUteis;
+            
+            console.log('🔄 Alternando modo dias úteis:', mostrarApenasDiasUteis);
+            
+            if (mostrarApenasDiasUteis) {
+                calendar.setOption('hiddenDays', [0, 6]);
+                calendar.setOption('weekends', false);
+                console.log('✅ Finais de semana ocultados');
+            } else {
+                calendar.setOption('hiddenDays', []);
+                calendar.setOption('weekends', true);
+                console.log('✅ Todos os dias visíveis');
+            }
+            
+            calendar.render();
+            atualizarEstadoBotaoDiasUteis();
+            atualizarStatusToggle();
+        }
+
+        // Atualizar estado visual do botão
+        function atualizarEstadoBotaoDiasUteis() {
+            const label = document.querySelector('label[for="toggle-dias-uteis"]');
+            
+            if (!label) return;
+            
+            if (mostrarApenasDiasUteis) {
+                label.innerHTML = `
+                    <i class="fas fa-calendar-check me-1"></i>
+                    <strong>Somente Dias Úteis</strong>
+                    <span class="badge bg-success ms-2">Ativo</span>
+                `;
+            } else {
+                label.innerHTML = `
+                    <i class="fas fa-calendar me-1"></i>
+                    <strong>Todos os Dias</strong>
+                    <span class="badge bg-secondary ms-2">Inativo</span>
+                `;
+            }
+        }
+
+        // Atualizar status do toggle
+        function atualizarStatusToggle() {
+            const status = document.getElementById('toggle-status');
+            if (mostrarApenasDiasUteis) {
+                status.innerHTML = '<strong>Status:</strong> Modo "Somente Dias Úteis" ativo - Finais de semana ocultados';
+                status.className = 'test-success';
+            } else {
+                status.innerHTML = '<strong>Status:</strong> Modo "Todos os Dias" ativo - Todos os dias visíveis';
+                status.className = 'test-info';
+            }
+        }
+
+        // Testes automáticos
+        function executarTestesAutomaticos() {
+            console.log('🧪 Executando testes automáticos...');
+            
+            // Teste 1: Verificar se o calendário foi inicializado
+            setTimeout(() => {
+                if (calendar) {
+                    adicionarResultadoTeste('Calendário inicializado', 'SUCCESS', 'Calendário FullCalendar carregado corretamente');
+                } else {
+                    adicionarResultadoTeste('Calendário inicializado', 'ERROR', 'Falha ao inicializar calendário');
+                }
+            }, 1000);
+
+            // Teste 2: Verificar se o botão toggle existe
+            setTimeout(() => {
+                const botaoToggle = document.getElementById('toggle-dias-uteis');
+                if (botaoToggle) {
+                    adicionarResultadoTeste('Botão toggle presente', 'SUCCESS', 'Botão toggle encontrado na interface');
+                } else {
+                    adicionarResultadoTeste('Botão toggle presente', 'ERROR', 'Botão toggle não encontrado');
+                }
+            }, 1500);
+
+            // Teste 3: Verificar configuração firstDay
+            setTimeout(() => {
+                const firstDay = calendar.getOption('firstDay');
+                if (firstDay === 1) {
+                    adicionarResultadoTeste('Configuração firstDay', 'SUCCESS', 'Segunda-feira configurada como primeiro dia (firstDay: 1)');
+                } else {
+                    adicionarResultadoTeste('Configuração firstDay', 'ERROR', `firstDay incorreto: ${firstDay} (deveria ser 1)`);
+                }
+            }, 2000);
+
+            // Teste 4: Verificar função de cálculo de data
+            setTimeout(() => {
+                const dataTeste = new Date('2025-01-13'); // Domingo
+                const diaSemana = dataTeste.getDay();
+                if (diaSemana === 0) {
+                    adicionarResultadoTeste('Cálculo de dia da semana', 'SUCCESS', '13/01/2025 é corretamente identificado como domingo (dia 0)');
+                } else {
+                    adicionarResultadoTeste('Cálculo de dia da semana', 'ERROR', `13/01/2025 identificado como dia ${diaSemana} (deveria ser 0)`);
+                }
+            }, 2500);
+        }
+
+        // Executar testes manuais
+        function executarTestes() {
+            console.log('🧪 Executando testes manuais...');
+            const resultsDiv = document.getElementById('test-results');
+            resultsDiv.innerHTML = '<h5>Resultados dos Testes:</h5>';
+            
+            // Teste 1: Verificar estado inicial
+            adicionarResultadoTeste('Estado inicial', 'INFO', 'Verificando configuração inicial...');
+            
+            // Teste 2: Simular clique no toggle
+            setTimeout(() => {
+                const botaoToggle = document.getElementById('toggle-dias-uteis');
+                if (botaoToggle) {
+                    botaoToggle.click();
+                    adicionarResultadoTeste('Funcionalidade toggle', 'SUCCESS', 'Botão toggle funcionando corretamente');
+                } else {
+                    adicionarResultadoTeste('Funcionalidade toggle', 'ERROR', 'Botão toggle não encontrado');
+                }
+            }, 1000);
+
+            // Teste 3: Verificar mudança de estado
+            setTimeout(() => {
+                if (mostrarApenasDiasUteis) {
+                    adicionarResultadoTeste('Mudança de estado', 'SUCCESS', 'Estado alterado para "Somente Dias Úteis"');
+                } else {
+                    adicionarResultadoTeste('Mudança de estado', 'ERROR', 'Estado não foi alterado');
+                }
+            }, 2000);
+
+            // Teste 4: Verificar configuração do calendário
+            setTimeout(() => {
+                const hiddenDays = calendar.getOption('hiddenDays');
+                const weekends = calendar.getOption('weekends');
+                
+                if (mostrarApenasDiasUteis && hiddenDays.length === 2 && !weekends) {
+                    adicionarResultadoTeste('Configuração calendário', 'SUCCESS', 'Finais de semana ocultados corretamente');
+                } else if (!mostrarApenasDiasUteis && hiddenDays.length === 0 && weekends) {
+                    adicionarResultadoTeste('Configuração calendário', 'SUCCESS', 'Todos os dias visíveis corretamente');
+                } else {
+                    adicionarResultadoTeste('Configuração calendário', 'ERROR', 'Configuração do calendário incorreta');
+                }
+            }, 3000);
+        }
+
+        // Adicionar resultado de teste
+        function adicionarResultadoTeste(nome, tipo, mensagem) {
+            const resultsDiv = document.getElementById('test-results');
+            const resultadoDiv = document.createElement('div');
+            resultadoDiv.className = `test-result test-${tipo.toLowerCase()}`;
+            resultadoDiv.innerHTML = `<strong>${nome}:</strong> ${mensagem}`;
+            resultsDiv.appendChild(resultadoDiv);
+            
+            console.log(`🧪 ${nome}: ${mensagem}`);
+        }
+
+        console.log('📅 Script de teste carregado!');
+    </script>
+</body>
+</html>

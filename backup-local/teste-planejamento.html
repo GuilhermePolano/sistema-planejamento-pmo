@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Rotas de Planejamento</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 4px solid #667eea;
+        }
+        .success { border-left-color: #28a745; }
+        .error { border-left-color: #dc3545; }
+        .info { border-left-color: #17a2b8; }
+        button {
+            padding: 12px 20px;
+            margin: 8px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 12px;
+            color: #f8f9fa;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .status.success { background: #28a745; }
+        .status.error { background: #dc3545; }
+        .status.info { background: #17a2b8; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Teste - Rotas de Planejamento Semanal</h1>
+        <p>Verificando se as rotas de planejamento estão funcionando corretamente.</p>
+    </div>
+
+    <div class="container">
+        <h2>🔍 Testes de Funcionalidade</h2>
+        
+        <div class="test-section">
+            <h3>1. Teste de Conexão com API</h3>
+            <button onclick="testConnection()">Testar Conexão</button>
+            <div id="connection-result">Aguardando teste...</div>
+        </div>
+
+        <div class="test-section">
+            <h3>2. Teste de Busca de Planejamento</h3>
+            <button onclick="testGetPlanning()">Buscar Planejamento</button>
+            <div id="get-result">Aguardando teste...</div>
+        </div>
+
+        <div class="test-section">
+            <h3>3. Teste de Criação de Planejamento</h3>
+            <button onclick="testCreatePlanning()">Criar Planejamento</button>
+            <div id="create-result">Aguardando teste...</div>
+        </div>
+
+        <div class="test-section">
+            <h3>4. Teste de Criação de Tarefa</h3>
+            <button onclick="testCreateTask()">Criar Tarefa</button>
+            <div id="task-result">Aguardando teste...</div>
+        </div>
+
+        <div class="test-section">
+            <h3>5. Teste de Atualização de Planejamento</h3>
+            <button onclick="testUpdatePlanning()">Atualizar Planejamento</button>
+            <div id="update-result">Aguardando teste...</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>📋 Logs de Teste</h2>
+        <div id="test-logs" style="max-height: 400px; overflow-y: auto;">
+            <p>Os logs de teste aparecerão aqui...</p>
+        </div>
+    </div>
+
+    <script>
+        let currentPlanningId = null;
+
+        function log(message, type = 'info') {
+            const logsDiv = document.getElementById('test-logs');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `test-section ${type}`;
+            logEntry.innerHTML = `
+                <span class="status ${type}">${type.toUpperCase()}</span>
+                <strong>[${timestamp}]</strong> ${message}
+            `;
+            logsDiv.insertBefore(logEntry, logsDiv.firstChild);
+        }
+
+        async function testConnection() {
+            const resultDiv = document.getElementById('connection-result');
+            resultDiv.innerHTML = '<p>Testando conexão...</p>';
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/planejamento');
+                if (response.ok) {
+                    resultDiv.innerHTML = '<p class="success">✅ Conexão estabelecida com sucesso!</p>';
+                    log('Conexão com API de planejamento estabelecida', 'success');
+                } else if (response.status === 404) {
+                    resultDiv.innerHTML = '<p class="info">ℹ️ API funcionando (404 é normal se não há planejamento)</p>';
+                    log('API de planejamento funcionando (sem dados)', 'info');
+                } else {
+                    resultDiv.innerHTML = `<p class="error">❌ Erro na API: ${response.status}</p>`;
+                    log(`Erro na API: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">❌ Erro de conexão: ${error.message}</p>`;
+                log(`Erro de conexão: ${error.message}`, 'error');
+            }
+        }
+
+        async function testGetPlanning() {
+            const resultDiv = document.getElementById('get-result');
+            resultDiv.innerHTML = '<p>Buscando planejamento...</p>';
+            
+            try {
+                const dataInicio = new Date();
+                dataInicio.setDate(dataInicio.getDate() + (8 - dataInicio.getDay()) % 7);
+                
+                const response = await fetch(`http://localhost:3000/api/planejamento?dataInicio=${dataInicio.toISOString().split('T')[0]}&numSemanas=4`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = `
+                        <p class="success">✅ Planejamento encontrado!</p>
+                        <p><strong>ID:</strong> ${data.id || data._id}</p>
+                        <p><strong>Semanas:</strong> ${data.semanas?.length || 0}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                    currentPlanningId = data.id || data._id;
+                    log('Planejamento encontrado com sucesso', 'success');
+                } else if (response.status === 404) {
+                    resultDiv.innerHTML = '<p class="info">ℹ️ Nenhum planejamento encontrado (normal se não foi criado ainda)</p>';
+                    log('Nenhum planejamento encontrado', 'info');
+                } else {
+                    const error = await response.json();
+                    resultDiv.innerHTML = `<p class="error">❌ Erro: ${JSON.stringify(error)}</p>`;
+                    log(`Erro ao buscar planejamento: ${JSON.stringify(error)}`, 'error');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">❌ Erro: ${error.message}</p>`;
+                log(`Erro ao buscar planejamento: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCreatePlanning() {
+            const resultDiv = document.getElementById('create-result');
+            resultDiv.innerHTML = '<p>Criando planejamento...</p>';
+            
+            try {
+                const dataInicio = new Date();
+                dataInicio.setDate(dataInicio.getDate() + (8 - dataInicio.getDay()) % 7);
+                
+                const response = await fetch('http://localhost:3000/api/planejamento', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        dataInicio: dataInicio.toISOString().split('T')[0],
+                        numSemanas: 4
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = `
+                        <p class="success">✅ Planejamento criado com sucesso!</p>
+                        <p><strong>ID:</strong> ${data.id || data._id}</p>
+                        <p><strong>Semanas:</strong> ${data.semanas?.length || 0}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                    currentPlanningId = data.id || data._id;
+                    log('Planejamento criado com sucesso', 'success');
+                } else {
+                    const error = await response.json();
+                    resultDiv.innerHTML = `<p class="error">❌ Erro: ${JSON.stringify(error)}</p>`;
+                    log(`Erro ao criar planejamento: ${JSON.stringify(error)}`, 'error');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">❌ Erro: ${error.message}</p>`;
+                log(`Erro ao criar planejamento: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCreateTask() {
+            const resultDiv = document.getElementById('task-result');
+            resultDiv.innerHTML = '<p>Criando tarefa...</p>';
+            
+            try {
+                const dataInicio = new Date();
+                dataInicio.setDate(dataInicio.getDate() + (8 - dataInicio.getDay()) % 7);
+                
+                const response = await fetch('http://localhost:3000/api/planejamento/tarefas', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        titulo: 'Tarefa de Teste',
+                        analista: 'Teste Analista',
+                        projeto: 'Projeto Teste',
+                        prioridade: 'Média',
+                        status: 'Backlog',
+                        horasEstimadas: 8,
+                        dataInicio: dataInicio.toISOString().split('T')[0],
+                        dataFim: dataInicio.toISOString().split('T')[0]
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = `
+                        <p class="success">✅ Tarefa criada com sucesso!</p>
+                        <p><strong>ID:</strong> ${data.id}</p>
+                        <p><strong>Título:</strong> ${data.titulo}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                    log('Tarefa criada com sucesso', 'success');
+                } else {
+                    const error = await response.json();
+                    resultDiv.innerHTML = `<p class="error">❌ Erro: ${JSON.stringify(error)}</p>`;
+                    log(`Erro ao criar tarefa: ${JSON.stringify(error)}`, 'error');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">❌ Erro: ${error.message}</p>`;
+                log(`Erro ao criar tarefa: ${error.message}`, 'error');
+            }
+        }
+
+        async function testUpdatePlanning() {
+            const resultDiv = document.getElementById('update-result');
+            resultDiv.innerHTML = '<p>Atualizando planejamento...</p>';
+            
+            if (!currentPlanningId) {
+                resultDiv.innerHTML = '<p class="error">❌ Nenhum planejamento criado para atualizar</p>';
+                log('Nenhum planejamento para atualizar', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`http://localhost:3000/api/planejamento/${currentPlanningId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        atualizadoEm: new Date(),
+                        observacao: 'Teste de atualização'
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = `
+                        <p class="success">✅ Planejamento atualizado com sucesso!</p>
+                        <p><strong>ID:</strong> ${data.id || data._id}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                    log('Planejamento atualizado com sucesso', 'success');
+                } else {
+                    const error = await response.json();
+                    resultDiv.innerHTML = `<p class="error">❌ Erro: ${JSON.stringify(error)}</p>`;
+                    log(`Erro ao atualizar planejamento: ${JSON.stringify(error)}`, 'error');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">❌ Erro: ${error.message}</p>`;
+                log(`Erro ao atualizar planejamento: ${error.message}`, 'error');
+            }
+        }
+
+        // Executar testes automaticamente ao carregar a página
+        window.onload = function() {
+            log('Iniciando testes de planejamento...', 'info');
+            setTimeout(() => testConnection(), 1000);
+            setTimeout(() => testGetPlanning(), 2000);
+            setTimeout(() => testCreatePlanning(), 3000);
+            setTimeout(() => testCreateTask(), 4000);
+            setTimeout(() => testUpdatePlanning(), 5000);
+        };
+    </script>
+</body>
+</html>

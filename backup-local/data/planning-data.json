@@ -1,0 +1,176 @@
+[
+  {
+    "id": "1754936378599",
+    "dataInicio": "2025-08-11T00:00:00.000Z",
+    "dataFim": "2025-09-14T02:59:59.999Z",
+    "semanas": [
+      {
+        "numero": 1,
+        "dataInicio": "2025-08-10T03:00:00.000Z",
+        "dataFim": "2025-08-17T02:59:59.999Z",
+        "dias": [
+          {
+            "data": "2025-08-10T03:00:00.000Z",
+            "tarefas": []
+          },
+          {
+            "data": "2025-08-11T03:00:00.000Z",
+            "tarefas": []
+          },
+          {
+            "data": "2025-08-12T03:00:00.000Z",
+            "tarefas": []
+          },
+          {
+            "data": "2025-08-13T03:00:00.000Z",
+            "tarefas": []
+          },
+          {
+            "data": "2025-08-14T03:00:00.000Z",
+            "tarefas": []
+          },
+          {
+            "data": "2025-08-15T03:00:00.000Z",
+            "tarefas": []
+          },
+          {
+            "data": "2025-08-16T03:00:00.000Z",
+            "tarefas": []
+          }
+        ],
+        "tarefas": [],
+        "metricas": {
+          "totalTarefas": 0,
+          "horasEstimadas": 0,
+          "progresso": 0
+        }
+      },
+      {
+        "numero": 2,
+        "dataInicio": "2025-08-17T03:00:00.000Z",
+        "dataFim": "2025-08-24T02:59:59.999Z",
+        "dias": [
+          {
+            "data": "2025-08-17T03:00:00.000Z",
+            "tarefas": []
+          },
+          {
+            "data": "2025-08-18T03:00:00.000Z",
+            "tarefas": []
+          },
+          {
+            "data": "2025-08-19T03:00:00.000Z",
+            "tarefas": []
+          },
+          {
+            "data": "2025-08-20T03:00:00.000Z",
+            "tarefas": []
+          },
+          {
+            "data": "2025-08-21T03:00:00.000Z",
+            "tarefas": []
+          },
+          {
+            "data": "2025-08-22T03:00:00.000Z",
+            "tarefas": []
+          },
+          {
+            "data": "2025-08-23T03:00:00.000Z",
+            "tarefas": []
+          }
+        ],
+        "tarefas": [],
+        "metricas": {
+          "totalTarefas": 0,
+          "horasEstimadas": 0,
+          "progresso": 0
+        }
+      },
+      {
+        "numero": 3,
+        "dataInicio": "2025-08-24T03:00:00.000Z",
+        "dataFim": "2025-08-31T02:59:59.999Z",
+        "dias": [
+          {
+            "data": "2025-08-24T03:00:00.000Z",
+            "tarefas": []
+          },
+          {
+            "data": "2025-08-25T03:00:00.000Z",
+            "tarefas": []
+          },
+          {
+            "data": "2025-08-26T03:00:00.000Z",
+            "tarefas": []
+          },
+          {
+            "data": "2025-08-27T03:00:00.000Z",
+            "tarefas": []
+          },
+          {
+            "data": "2025-08-28T03:00:00.000Z",
+            "tarefas": []
+          },
+          {
+            "data": "2025-08-29T03:00:00.000Z",
+            "tarefas": []
+          },
+          {
+            "data": "2025-08-30T03:00:00.000Z",
+            "tarefas": []
+          }
+        ],
+        "tarefas": [],
+        "metricas": {
+          "totalTarefas": 0,
+          "horasEstimadas": 0,
+          "progresso": 0
+        }
+      },
+      {
+        "numero": 4,
+        "dataInicio": "2025-08-31T03:00:00.000Z",
+        "dataFim": "2025-09-07T02:59:59.999Z",
+        "dias": [
+          {
+            "data": "2025-08-31T03:00:00.000Z",
+            "tarefas": []
+          },
+          {
+            "data": "2025-09-01T03:00:00.000Z",
+            "tarefas": []
+          },
+          {
+            "data": "2025-09-02T03:00:00.000Z",
+            "tarefas": []
+          },
+          {
+            "data": "2025-09-03T03:00:00.000Z",
+            "tarefas": []
+          },
+          {
+            "data": "2025-09-04T03:00:00.000Z",
+            "tarefas": []
+          },
+          {
+            "data": "2025-09-05T03:00:00.000Z",
+            "tarefas": []
+          },
+          {
+            "data": "2025-09-06T03:00:00.000Z",
+            "tarefas": []
+          }
+        ],
+        "tarefas": [],
+        "metricas": {
+          "totalTarefas": 0,
+          "horasEstimadas": 0,
+          "progresso": 0
+        }
+      }
+    ],
+    "criadoPor": "Sistema",
+    "criadoEm": "2025-08-11T18:19:38.601Z",
+    "atualizadoEm": "2025-08-11T18:19:38.601Z"
+  }
+]

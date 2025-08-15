@@ -1,0 +1,42 @@
+flowchart TD
+    PLANNING_START([Acesso ao Planejamento]) --> INIT_PAGE[Inicializar Página]
+    INIT_PAGE --> SET_DATE[Definir Data Inicial]
+    SET_DATE --> LOAD_DATA[Carregar Dados]
+    LOAD_DATA --> LOAD_TASKS[Carregar Tarefas]
+    LOAD_TASKS --> LOAD_ANALYSTS[Carregar Analistas]
+    LOAD_ANALYSTS --> LOAD_CAPACITIES[Carregar Capacidades]
+    LOAD_CAPACITIES --> RENDER_CALENDAR[Renderizar Calendário]
+    RENDER_CALENDAR --> USER_INTERACTION[Interação do Usuário]
+    USER_INTERACTION --> APPLY_FILTERS[Aplicar Filtros]
+    APPLY_FILTERS --> FILTER_CHOICE{Tipo de Filtro?}
+    FILTER_CHOICE -->|Analista| FILTER_BY_ANALYST[Filtrar por Analista]
+    FILTER_CHOICE -->|Projeto| FILTER_BY_PROJECT[Filtrar por Projeto]
+    FILTER_CHOICE -->|Data| FILTER_BY_DATE[Filtrar por Data]
+    FILTER_CHOICE -->|Tipo| FILTER_BY_TYPE[Filtrar por Tipo]
+    FILTER_BY_ANALYST --> UPDATE_VIEW[Atualizar Visualização]
+    FILTER_BY_PROJECT --> UPDATE_VIEW
+    FILTER_BY_DATE --> UPDATE_VIEW
+    FILTER_BY_TYPE --> UPDATE_VIEW
+    UPDATE_VIEW --> DRAG_OPERATIONS[Operações Drag & Drop]
+    DRAG_OPERATIONS --> MOVE_TASK[Mover Tarefa]
+    MOVE_TASK --> CHECK_CAPACITY{Verificar Capacidade}
+    CHECK_CAPACITY -->|OK| ALLOW_MOVE[Permitir Movimento]
+    CHECK_CAPACITY -->|Excedida| SHOW_WARNING[Mostrar Aviso]
+    SHOW_WARNING --> ALLOW_MOVE
+    ALLOW_MOVE --> MARK_CHANGES[Marcar Mudanças]
+    MARK_CHANGES --> SAVE_OPTION{Salvar?}
+    SAVE_OPTION -->|Sim| SAVE_PLANNING[Salvar Planejamento]
+    SAVE_OPTION -->|Não| CONTINUE_EDITING[Continuar Editando]
+    SAVE_PLANNING --> API_SAVE[Chamar API de Salvamento]
+    API_SAVE --> SUCCESS_SAVE[Salvamento Bem-sucedido]
+    CONTINUE_EDITING --> DRAG_OPERATIONS
+    
+    classDef startEnd fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef process fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef decision fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef warning fill:#fff8e1,stroke:#f57c00,stroke-width:2px
+    
+    class PLANNING_START,SUCCESS_SAVE startEnd
+    class INIT_PAGE,SET_DATE,LOAD_DATA,LOAD_TASKS,LOAD_ANALYSTS,LOAD_CAPACITIES,RENDER_CALENDAR,USER_INTERACTION,APPLY_FILTERS,FILTER_BY_ANALYST,FILTER_BY_PROJECT,FILTER_BY_DATE,FILTER_BY_TYPE,UPDATE_VIEW,DRAG_OPERATIONS,MOVE_TASK,ALLOW_MOVE,MARK_CHANGES,SAVE_PLANNING,API_SAVE process
+    class FILTER_CHOICE,CHECK_CAPACITY,SAVE_OPTION decision
+    class SHOW_WARNING warning

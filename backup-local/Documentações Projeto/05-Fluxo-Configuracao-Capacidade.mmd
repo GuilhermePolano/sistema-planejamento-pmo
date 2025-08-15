@@ -1,0 +1,29 @@
+flowchart TD
+    CAPACITY_START([Configuração de Capacidade]) --> LOAD_ANALYSTS[Carregar Analistas]
+    LOAD_ANALYSTS --> SELECT_ANALYST[Selecionar Analista]
+    SELECT_ANALYST --> SET_CAPACITY[Definir Capacidade]
+    SET_CAPACITY --> CAPACITY_TYPE{Tipo de Configuração?}
+    CAPACITY_TYPE -->|Férias| SET_VACATION[Configurar Férias]
+    CAPACITY_TYPE -->|Redução| SET_REDUCTION[Configurar Redução]
+    CAPACITY_TYPE -->|Falta| SET_ABSENCE[Configurar Falta]
+    CAPACITY_TYPE -->|Normal| SET_NORMAL[Configurar Normal]
+    SET_VACATION --> SET_REASON[Definir Motivo]
+    SET_REDUCTION --> SET_REASON
+    SET_ABSENCE --> SET_REASON
+    SET_NORMAL --> SET_REASON
+    SET_REASON --> VALIDATE_CAPACITY{Configuração Válida?}
+    VALIDATE_CAPACITY -->|Não| SHOW_ERROR[Mostrar Erro]
+    VALIDATE_CAPACITY -->|Sim| SAVE_CAPACITY[Salvar Configuração]
+    SAVE_CAPACITY --> API_CAPACITY[Chamar API]
+    API_CAPACITY --> SUCCESS_CAPACITY[Configuração Salva]
+    SHOW_ERROR --> SET_CAPACITY
+    
+    classDef startEnd fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef process fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef decision fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef error fill:#ffebee,stroke:#c62828,stroke-width:2px
+    
+    class CAPACITY_START,SUCCESS_CAPACITY startEnd
+    class LOAD_ANALYSTS,SELECT_ANALYST,SET_CAPACITY,SET_VACATION,SET_REDUCTION,SET_ABSENCE,SET_NORMAL,SET_REASON,SAVE_CAPACITY,API_CAPACITY process
+    class CAPACITY_TYPE,VALIDATE_CAPACITY decision
+    class SHOW_ERROR error
