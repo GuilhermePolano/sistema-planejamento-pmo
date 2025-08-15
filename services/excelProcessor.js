@@ -408,6 +408,32 @@ class ExcelProcessor {
             const categorias = Array.from(categoriasMap.values());
             const sustentacoes = Array.from(sustentacoesMap.values());
 
+            // Calcular status dos projetos baseado nas atividades
+            projetos.forEach(projeto => {
+                if (projeto.tarefasDetalhadas && projeto.tarefasDetalhadas.length > 0) {
+                    const novoStatus = this.calcularStatusProjeto(projeto.tarefasDetalhadas);
+                    projeto.status = novoStatus;
+                    console.log(`📊 Projeto "${projeto.nome}": ${projeto.tarefasDetalhadas.length} tarefas -> Status: ${novoStatus}`);
+                    
+                    // Log detalhado para debug
+                    const statusCount = {};
+                    projeto.tarefasDetalhadas.forEach(tarefa => {
+                        const status = tarefa.status || 'Backlog';
+                        statusCount[status] = (statusCount[status] || 0) + 1;
+                    });
+                    console.log(`   📋 Detalhes: ${JSON.stringify(statusCount)}`);
+                }
+            });
+
+            // Calcular status das sustentações baseado nas atividades
+            sustentacoes.forEach(sustentacao => {
+                if (sustentacao.tarefasDetalhadas && sustentacao.tarefasDetalhadas.length > 0) {
+                    const novoStatus = this.calcularStatusProjeto(sustentacao.tarefasDetalhadas);
+                    sustentacao.status = novoStatus;
+                    console.log(`🔧 Sustentação "${sustentacao.nome}": ${sustentacao.tarefasDetalhadas.length} tarefas -> Status: ${novoStatus}`);
+                }
+            });
+
             // Adicionar stacks às categorias
             const stacksSet = new Set();
             analistas.forEach(analista => {
@@ -714,6 +740,97 @@ class ExcelProcessor {
             console.log('🔄 Tentando reprocessar CSV...');
             return this.processCSV();
         }
+    }
+
+    // Função para calcular o status do projeto baseado nas atividades
+    calcularStatusProjeto(tarefasDetalhadas) {
+        if (!tarefasDetalhadas || tarefasDetalhadas.length === 0) {
+            return 'Backlog';
+        }
+
+        // Contar atividades por status
+        const statusCount = {
+            'Backlog': 0,
+            'Em Análise': 0,
+            'Em Análise Técnica': 0,
+            'Em Análise de Negócio': 0,
+            'Em Desenvolvimento': 0,
+            'Em Homologação': 0,
+            'Pronto para Teste': 0,
+            'Concluída': 0,
+            'Produção': 0
+        };
+
+        // Contar status das tarefas
+        tarefasDetalhadas.forEach(tarefa => {
+            const status = tarefa.status || 'Backlog';
+            statusCount[status] = (statusCount[status] || 0) + 1;
+        });
+
+        const totalTarefas = tarefasDetalhadas.length;
+
+        // Log para debug
+        console.log(`   🔍 Calculando status para ${totalTarefas} tarefas:`);
+        console.log(`   📊 Status count: ${JSON.stringify(statusCount)}`);
+
+        // Regra 1: Se tem pelo menos uma atividade em Homologação
+        if (statusCount['Em Homologação'] > 0) {
+            console.log(`   ✅ Regra 1 aplicada: Em Homologação (${statusCount['Em Homologação']} tarefas)`);
+            return 'Em Homologação';
+        }
+
+        // Regra 2: Se tem pelo menos uma atividade em Desenvolvimento
+        if (statusCount['Em Desenvolvimento'] > 0) {
+            console.log(`   ✅ Regra 2 aplicada: Em Desenvolvimento (${statusCount['Em Desenvolvimento']} tarefas)`);
+            return 'Em Desenvolvimento';
+        }
+
+        // Regra 3: Se tem pelo menos uma atividade em Pronto para Teste
+        if (statusCount['Pronto para Teste'] > 0) {
+            console.log(`   ✅ Regra 3 aplicada: Em Desenvolvimento (${statusCount['Pronto para Teste']} tarefas em Pronto para Teste)`);
+            return 'Em Desenvolvimento';
+        }
+
+        // Regra 4: Se todas as atividades estão em Backlog
+        if (statusCount['Backlog'] === totalTarefas) {
+            console.log(`   ✅ Regra 4 aplicada: Backlog (todas as ${totalTarefas} tarefas em Backlog)`);
+            return 'Backlog';
+        }
+
+        // Regra 5: Se tem atividades em Análise (técnica ou de negócio)
+        if (statusCount['Em Análise'] > 0 || statusCount['Em Análise Técnica'] > 0 || statusCount['Em Análise de Negócio'] > 0) {
+            // Determinar qual tipo de análise tem mais atividades
+            const analiseTecnica = statusCount['Em Análise Técnica'] || 0;
+            const analiseNegocio = statusCount['Em Análise de Negócio'] || 0;
+            const analiseGeral = statusCount['Em Análise'] || 0;
+
+            if (analiseTecnica > 0) {
+                console.log(`   ✅ Regra 5 aplicada: Em Análise Técnica (${analiseTecnica} tarefas)`);
+                return 'Em Análise Técnica';
+            } else if (analiseNegocio > 0) {
+                console.log(`   ✅ Regra 5 aplicada: Em Análise de Negócio (${analiseNegocio} tarefas)`);
+                return 'Em Análise de Negócio';
+            } else if (analiseGeral > 0) {
+                console.log(`   ✅ Regra 5 aplicada: Em Análise (${analiseGeral} tarefas)`);
+                return 'Em Análise';
+            }
+        }
+
+        // Regra 6: Se todas as atividades estão concluídas
+        if (statusCount['Concluída'] === totalTarefas) {
+            console.log(`   ✅ Regra 6 aplicada: Concluído (todas as ${totalTarefas} tarefas concluídas)`);
+            return 'Concluído';
+        }
+
+        // Regra 7: Se todas as atividades estão em produção
+        if (statusCount['Produção'] === totalTarefas) {
+            console.log(`   ✅ Regra 7 aplicada: Produção (todas as ${totalTarefas} tarefas em produção)`);
+            return 'Produção';
+        }
+
+        // Regra 8: Caso padrão - se tem poucas atividades e nenhuma nos status principais
+        console.log(`   ✅ Regra 8 aplicada: Em Andamento (caso padrão)`);
+        return 'Em Andamento';
     }
 }
 

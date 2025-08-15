@@ -68,6 +68,16 @@ app.get('/upload', (req, res) => {
     res.sendFile(path.join(__dirname, 'upload.html'));
 });
 
+// Rota para teste das melhorias implementadas
+app.get('/teste-melhorias', (req, res) => {
+    res.sendFile(path.join(__dirname, 'teste-melhorias.html'));
+});
+
+// Rota para debug específico do projeto APP Tracker
+app.get('/debug-projeto', (req, res) => {
+    res.sendFile(path.join(__dirname, 'teste-debug-projeto.html'));
+});
+
 // Middleware de tratamento de erros
 app.use((error, req, res, next) => {
     console.error('Erro:', error);
@@ -95,6 +105,10 @@ app.listen(PORT, () => {
     console.log(`📄 Dados JSON: http://localhost:${PORT}/data/dashboard-data.json`);
     console.log(`📅 Planejamento Semanal: http://localhost:${PORT}/planejamento-semanal.html`);
     console.log(`🧪 Teste da Aplicação: http://localhost:${PORT}/teste-aplicacao.html`);
+    console.log(`🧪 Teste das Melhorias: http://localhost:${PORT}/teste-melhorias`);
+    console.log(`🔍 Debug Projeto: http://localhost:${PORT}/debug-projeto`);
+    console.log(`📊 Status do Sistema: http://localhost:${PORT}/api/system-status`);
+    console.log(`🔄 Recálculo de Status: http://localhost:${PORT}/api/recalcular-status-projetos`);
 });
 
 // Tratamento de erros não capturados

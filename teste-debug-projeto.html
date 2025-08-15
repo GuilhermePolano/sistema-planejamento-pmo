@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Debug Projeto - APP Tracker Status de Compra</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            margin: 5px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .result {
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .project-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .status-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .status-card {
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .status-card.current {
+            border-color: #ffc107;
+        }
+
+        .status-card.calculated {
+            border-color: #28a745;
+        }
+
+        .status-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .status-value.correct {
+            color: #28a745;
+        }
+
+        .status-value.incorrect {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Debug Projeto</h1>
+            <p>APP Tracker Status de Compra - Análise de Status</p>
+        </div>
+
+        <div class="content">
+            <div class="project-info">
+                <h3>📋 Projeto: APP Tracker Status de Compra</h3>
+                <p>Este projeto está com status incorreto. Vamos analisar e corrigir o problema.</p>
+            </div>
+
+            <button class="button" onclick="debugProjeto()">🔍 Debug Projeto</button>
+            <button class="button" onclick="reprocessarDados()">🔄 Reprocessar Dados</button>
+            <button class="button" onclick="recalcularStatus()">📊 Recalcular Status</button>
+
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Processando...</p>
+            </div>
+
+            <div id="result" class="result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+
+        function showLoading(show = true) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+
+        function showResult(data, type = 'info') {
+            const element = document.getElementById('result');
+            element.className = `result ${type}`;
+            element.textContent = typeof data === 'object' ? JSON.stringify(data, null, 2) : data;
+            element.style.display = 'block';
+        }
+
+        async function makeRequest(url, options = {}) {
+            try {
+                showLoading(true);
+                const response = await fetch(url, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    ...options
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.message || `Erro ${response.status}`);
+                }
+                
+                return data;
+            } catch (error) {
+                throw error;
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function debugProjeto() {
+            try {
+                const result = await makeRequest(`${API_BASE}/debug-projeto/APP Tracker Status de Compra`);
+                
+                if (result.success && result.projeto) {
+                    const projeto = result.projeto;
+                    const statusCorreto = projeto.statusAtual === projeto.statusCalculado;
+                    
+                    let output = `🔍 DEBUG DO PROJETO: ${projeto.nome}\n\n`;
+                    output += `📊 Total de Tarefas: ${projeto.totalTarefas}\n\n`;
+                    output += `📋 COMPARAÇÃO DE STATUS:\n`;
+                    output += `   Status Atual: ${projeto.statusAtual}\n`;
+                    output += `   Status Calculado: ${projeto.statusCalculado}\n`;
+                    output += `   Status Correto: ${statusCorreto ? '✅ SIM' : '❌ NÃO'}\n\n`;
+                    
+                    if (projeto.tarefasDetalhadas && projeto.tarefasDetalhadas.length > 0) {
+                        output += `📋 TAREFAS DO PROJETO:\n`;
+                        projeto.tarefasDetalhadas.forEach((tarefa, index) => {
+                            output += `   ${index + 1}. ${tarefa.titulo}\n`;
+                            output += `      Status: ${tarefa.status || 'Não definido'}\n`;
+                            output += `      Analista: ${tarefa.analista || 'Não definido'}\n\n`;
+                        });
+                    }
+                    
+                    showResult(output, statusCorreto ? 'success' : 'error');
+                } else {
+                    showResult(result, 'error');
+                }
+            } catch (error) {
+                showResult(`Erro: ${error.message}`, 'error');
+            }
+        }
+
+        async function reprocessarDados() {
+            try {
+                const result = await makeRequest(`${API_BASE}/reprocess-data`, {
+                    method: 'POST'
+                });
+                showResult(result, 'success');
+            } catch (error) {
+                showResult(`Erro: ${error.message}`, 'error');
+            }
+        }
+
+        async function recalcularStatus() {
+            try {
+                const result = await makeRequest(`${API_BASE}/recalcular-status-projetos`, {
+                    method: 'POST'
+                });
+                showResult(result, 'success');
+            } catch (error) {
+                showResult(`Erro: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-executar debug ao carregar a página
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔍 Página de debug carregada. Executando análise automática...');
+            setTimeout(debugProjeto, 1000);
+        });
+    </script>
+</body>
+</html>
