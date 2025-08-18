@@ -39,6 +39,9 @@ function initializePage() {
     loadDashboardData();
     loadAnalysts();
     updateCalendarTitle();
+    
+    // NOVO: Inicializar estatísticas PMO
+    updatePMOStatistics();
 }
 
 function setupEventListeners() {
@@ -261,6 +264,9 @@ function renderCalendar() {
     
     setupDragAndDrop();
     updateAnalystCapacities();
+    
+    // NOVO: Atualizar estatísticas PMO
+    updatePMOStatistics();
 }
 
 function renderWeekView(container) {
@@ -589,4 +595,145 @@ function showEmptyState() {
             <p>Clique em "Carregar Planejamento" para começar.</p>
         </div>
     `;
+}
+
+// ========================================
+// FUNÇÕES PMO - VISÃO GERENCIAL
+// ========================================
+
+let pmoViewExpanded = false;
+
+function togglePMOView() {
+    pmoViewExpanded = !pmoViewExpanded;
+    const toggleText = document.getElementById('pmoToggleText');
+    const analystsList = document.getElementById('pmoAnalystsList');
+    
+    if (pmoViewExpanded) {
+        toggleText.textContent = 'Ocultar Detalhes';
+        analystsList.style.display = 'grid';
+        updatePMOAnalystsList();
+    } else {
+        toggleText.textContent = 'Mostrar Detalhes';
+        analystsList.style.display = 'none';
+    }
+}
+
+function updatePMOStatistics() {
+    const weekStart = getWeekStart(currentDate);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    
+    // Calcular estatísticas da semana atual
+    let totalAnalistasSemana = 0;
+    let totalTarefasSemana = 0;
+    let totalHorasSemana = 0;
+    let totalAlocacao = 0;
+    
+    Object.keys(analystCapacities).forEach(analystName => {
+        const capacity = analystCapacities[analystName];
+        if (capacity.tasks && capacity.tasks.length > 0) {
+            // Verificar se há tarefas na semana atual
+            const tarefasSemana = capacity.tasks.filter(task => {
+                const taskDate = new Date(task.dataInicio);
+                return taskDate >= weekStart && taskDate <= weekEnd;
+            });
+            
+            if (tarefasSemana.length > 0) {
+                totalAnalistasSemana++;
+                totalTarefasSemana += tarefasSemana.length;
+                
+                const horasSemana = tarefasSemana.reduce((sum, task) => sum + (task.horasEstimadas || 0), 0);
+                totalHorasSemana += horasSemana;
+                totalAlocacao += (horasSemana / capacity.weeklyCapacity) * 100;
+            }
+        }
+    });
+    
+    const mediaAlocacao = totalAnalistasSemana > 0 ? Math.round(totalAlocacao / totalAnalistasSemana) : 0;
+    
+    // Atualizar estatísticas
+    document.getElementById('totalAnalistasSemana').textContent = totalAnalistasSemana;
+    document.getElementById('totalTarefasSemana').textContent = totalTarefasSemana;
+    document.getElementById('totalHorasSemana').textContent = `${totalHorasSemana}h`;
+    document.getElementById('mediaAlocacaoSemana').textContent = `${mediaAlocacao}%`;
+}
+
+function updatePMOAnalystsList() {
+    const weekStart = getWeekStart(currentDate);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    
+    const container = document.getElementById('pmoAnalystsList');
+    
+    const html = Object.keys(analystCapacities).map(analystName => {
+        const capacity = analystCapacities[analystName];
+        
+        // Filtrar tarefas da semana atual
+        const tarefasSemana = capacity.tasks ? capacity.tasks.filter(task => {
+            const taskDate = new Date(task.dataInicio);
+            return taskDate >= weekStart && taskDate <= weekEnd;
+        }) : [];
+        
+        if (tarefasSemana.length === 0) return '';
+        
+        // Calcular métricas da semana
+        const horasSemana = tarefasSemana.reduce((sum, task) => sum + (task.horasEstimadas || 0), 0);
+        const percentage = (horasSemana / capacity.weeklyCapacity) * 100;
+        
+        let statusClass = 'ok';
+        let statusText = 'OK';
+        if (percentage > 100) {
+            statusClass = 'overloaded';
+            statusText = 'Sobrecarregado';
+        } else if (percentage > 80) {
+            statusClass = 'warning';
+            statusText = 'Atenção';
+        }
+        
+        // Calcular distribuição por tipo na semana
+        const projectHours = tarefasSemana
+            .filter(task => task.tipo === 'projeto')
+            .reduce((sum, task) => sum + (task.horasEstimadas || 0), 0);
+        
+        const sustentacaoHours = tarefasSemana
+            .filter(task => task.tipo === 'sustentacao')
+            .reduce((sum, task) => sum + (task.horasEstimadas || 0), 0);
+        
+        return `
+            <div class="analyst-detail-card">
+                <div class="analyst-detail-header">
+                    <div class="analyst-detail-name">${analystName}</div>
+                    <div class="analyst-detail-status ${statusClass}">${statusText}</div>
+                </div>
+                
+                <div class="analyst-detail-metrics">
+                    <div class="metric-item">
+                        <div class="metric-value">${horasSemana}h</div>
+                        <div class="metric-label">Semana</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">${capacity.allocatedHours}h</div>
+                        <div class="metric-label">Total</div>
+                    </div>
+                </div>
+                
+                <div class="analyst-detail-breakdown">
+                    <div class="breakdown-item">
+                        <div class="breakdown-label projeto">Projetos</div>
+                        <div class="breakdown-value">${projectHours}h</div>
+                    </div>
+                    <div class="breakdown-item">
+                        <div class="breakdown-label sustentacao">Sustentação</div>
+                        <div class="breakdown-value">${sustentacaoHours}h</div>
+                    </div>
+                </div>
+                
+                <div class="analyst-detail-tasks">
+                    ${tarefasSemana.length} tarefas na semana atual
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    container.innerHTML = html;
 }

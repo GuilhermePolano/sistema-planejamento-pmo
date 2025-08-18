@@ -320,6 +320,174 @@
             background: linear-gradient(90deg, #e53e3e 0%, #c53030 100%);
         }
 
+        /* PAINEL PMO - VISÃO GERENCIAL */
+        .pmo-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .pmo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .pmo-header h3 {
+            color: #4a5568;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pmo-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .pmo-analysts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .analyst-detail-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .analyst-detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .analyst-detail-name {
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 1.1rem;
+        }
+
+        .analyst-detail-status {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .analyst-detail-status.ok {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .analyst-detail-status.warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .analyst-detail-status.overloaded {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .analyst-detail-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .metric-item {
+            text-align: center;
+            padding: 8px;
+            background: white;
+            border-radius: 6px;
+        }
+
+        .metric-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #4a5568;
+        }
+
+        .metric-label {
+            font-size: 0.7rem;
+            color: #718096;
+            margin-top: 2px;
+        }
+
+        .analyst-detail-breakdown {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .breakdown-item {
+            text-align: center;
+            flex: 1;
+        }
+
+        .breakdown-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-bottom: 4px;
+        }
+
+        .breakdown-label.projeto {
+            background: #e6fffa;
+            color: #319795;
+        }
+
+        .breakdown-label.sustentacao {
+            background: #fef5e7;
+            color: #d69e2e;
+        }
+
+        .breakdown-value {
+            font-weight: bold;
+            color: #4a5568;
+        }
+
+        .analyst-detail-tasks {
+            font-size: 0.8rem;
+            color: #718096;
+            text-align: center;
+            padding: 8px;
+            background: white;
+            border-radius: 6px;
+        }
+
         /* NOVOS ESTILOS: Distribuição por tipo */
         .analyst-distribution {
             margin-top: 8px;
@@ -615,6 +783,47 @@
                     <i class="fas fa-users"></i>
                     Distribuir por Analista
                 </button>
+            </div>
+        </div>
+
+        <!-- Painel PMO - Visão Gerencial -->
+        <div class="pmo-panel">
+            <div class="pmo-header">
+                <h3>
+                    <i class="fas fa-chart-pie"></i>
+                    Visão PMO - Alocação Semanal
+                </h3>
+                <div class="pmo-controls">
+                    <button class="btn btn-sm btn-outline-primary" onclick="togglePMOView()">
+                        <i class="fas fa-eye"></i>
+                        <span id="pmoToggleText">Mostrar Detalhes</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Estatísticas Gerais -->
+            <div class="pmo-stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalAnalistasSemana">0</div>
+                    <div class="stat-label">Analistas na Semana</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalTarefasSemana">0</div>
+                    <div class="stat-label">Tarefas na Semana</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalHorasSemana">0h</div>
+                    <div class="stat-label">Horas Alocadas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="mediaAlocacaoSemana">0%</div>
+                    <div class="stat-label">Média Alocação</div>
+                </div>
+            </div>
+            
+            <!-- Lista Detalhada de Analistas -->
+            <div class="pmo-analysts" id="pmoAnalystsList" style="display: none;">
+                <!-- Analistas serão carregados aqui -->
             </div>
         </div>
 
