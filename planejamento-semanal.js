@@ -16,13 +16,24 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializePage() {
-    // Definir data de início padrão (próxima segunda-feira)
+    // Definir data de início padrão (data atual)
     const today = new Date();
-    const nextMonday = new Date(today);
-    nextMonday.setDate(today.getDate() + (8 - today.getDay()) % 7);
     
-    document.getElementById('dataInicio').value = nextMonday.toISOString().split('T')[0];
-    currentDate = nextMonday;
+    // Se hoje for segunda-feira, usar hoje. Senão, usar a próxima segunda-feira
+    const dayOfWeek = today.getDay(); // 0 = domingo, 1 = segunda, etc.
+    let startDate;
+    
+    if (dayOfWeek === 1) { // Segunda-feira
+        startDate = today;
+    } else {
+        // Calcular próxima segunda-feira
+        const daysUntilMonday = dayOfWeek === 0 ? 1 : (8 - dayOfWeek);
+        startDate = new Date(today);
+        startDate.setDate(today.getDate() + daysUntilMonday);
+    }
+    
+    document.getElementById('dataInicio').value = startDate.toISOString().split('T')[0];
+    currentDate = startDate;
     
     // Carregar dados iniciais
     loadDashboardData();
@@ -75,7 +86,9 @@ async function loadAnalysts() {
                     analystCapacities[analyst.nome] = {
                         weeklyCapacity: 40,
                         allocatedHours: 0,
-                        tasks: []
+                        tasks: [],
+                        projectHours: 0,
+                        sustentacaoHours: 0
                     };
                 });
                 
@@ -150,6 +163,13 @@ function distributeTasksByAnalyst() {
                 // Adicionar à capacidade do analista
                 analystCapacities[task.analista].tasks.push(dailyTask);
                 analystCapacities[task.analista].allocatedHours += dailyTask.horasEstimadas;
+                
+                // Contar horas por tipo
+                if (task.tipo === 'projeto') {
+                    analystCapacities[task.analista].projectHours += dailyTask.horasEstimadas;
+                } else if (task.tipo === 'sustentacao') {
+                    analystCapacities[task.analista].sustentacaoHours += dailyTask.horasEstimadas;
+                }
             }
         }
     });
@@ -164,6 +184,8 @@ function clearAllTasks() {
     Object.keys(analystCapacities).forEach(analystName => {
         analystCapacities[analystName].tasks = [];
         analystCapacities[analystName].allocatedHours = 0;
+        analystCapacities[analystName].projectHours = 0;
+        analystCapacities[analystName].sustentacaoHours = 0;
     });
 }
 
@@ -215,9 +237,16 @@ function updateCalendarTitle() {
 
 function getWeekStart(date) {
     const d = new Date(date);
-    const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Ajustar quando domingo
-    return new Date(d.setDate(diff));
+    const day = d.getDay(); // 0 = domingo, 1 = segunda, 2 = terça, etc.
+    
+    // Calcular quantos dias voltar para chegar na segunda-feira
+    // Se for segunda (1), não voltar nenhum dia
+    // Se for terça (2), voltar 1 dia
+    // Se for domingo (0), voltar 6 dias
+    const daysToSubtract = day === 0 ? 6 : day - 1;
+    
+    d.setDate(d.getDate() - daysToSubtract);
+    return d;
 }
 
 // Função principal para renderizar o calendário
@@ -237,6 +266,7 @@ function renderCalendar() {
 function renderWeekView(container) {
     const weekStart = getWeekStart(currentDate);
     const daysOfWeek = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+    const filtroAnalista = document.getElementById('filtroAnalista').value;
     
     let html = `
         <div class="calendar-header">
@@ -258,24 +288,61 @@ function renderWeekView(container) {
     
     html += '</div><div class="calendar-grid">';
     
-    // Coluna dos analistas
+    // Coluna dos analistas - FILTRADA
     html += '<div class="analyst-column">';
-    analysts.forEach(analyst => {
-        const capacity = analystCapacities[analyst.nome] || { weeklyCapacity: 40, allocatedHours: 0 };
+    
+    // Determinar quais analistas mostrar
+    let analystsToShow = analysts;
+    if (filtroAnalista) {
+        analystsToShow = analysts.filter(analyst => analyst.nome === filtroAnalista);
+    }
+    
+    analystsToShow.forEach(analyst => {
+        const capacity = analystCapacities[analyst.nome] || { 
+            weeklyCapacity: 40, 
+            allocatedHours: 0, 
+            projectHours: 0, 
+            sustentacaoHours: 0 
+        };
         const percentage = (capacity.allocatedHours / capacity.weeklyCapacity) * 100;
         
         let statusClass = 'ok';
         if (percentage > 100) statusClass = 'overloaded';
         else if (percentage > 80) statusClass = 'warning';
         
+        // Calcular porcentagens de projetos vs sustentação
+        const totalHours = capacity.allocatedHours || 1; // Evitar divisão por zero
+        const projectPercentage = Math.round((capacity.projectHours / totalHours) * 100);
+        const sustentacaoPercentage = Math.round((capacity.sustentacaoHours / totalHours) * 100);
+        
+        // Calcular horas restantes na semana
+        const remainingHours = Math.max(0, capacity.weeklyCapacity - capacity.allocatedHours);
+        
         html += `
             <div class="analyst-header">${analyst.nome}</div>
             <div class="analyst-capacity">
-                <div>${capacity.allocatedHours}h / ${capacity.weeklyCapacity}h</div>
+                <div class="capacity-summary">
+                    <div class="capacity-hours">${capacity.allocatedHours}h / ${capacity.weeklyCapacity}h</div>
+                    <div class="capacity-percentage">${Math.round(percentage)}% alocado</div>
+                </div>
                 <div class="capacity-bar">
                     <div class="capacity-fill ${statusClass}" style="width: ${Math.min(percentage, 100)}%"></div>
                 </div>
-                <div>${Math.round(percentage)}%</div>
+                <div class="capacity-details">
+                    <div class="remaining-hours">${remainingHours}h disponíveis</div>
+                </div>
+                
+                <!-- NOVA SEÇÃO: Distribuição por tipo -->
+                <div class="analyst-distribution">
+                    <div class="distribution-item">
+                        <span class="distribution-label projeto">Projetos:</span>
+                        <span class="distribution-value">${projectPercentage}% (${capacity.projectHours}h)</span>
+                    </div>
+                    <div class="distribution-item">
+                        <span class="distribution-label sustentacao">Sustentação:</span>
+                        <span class="distribution-value">${sustentacaoPercentage}% (${capacity.sustentacaoHours}h)</span>
+                    </div>
+                </div>
             </div>
         `;
     });
@@ -296,8 +363,8 @@ function renderWeekView(container) {
                 <div class="tasks-container" data-day="${dayKey}">
         `;
         
-        // Adicionar tarefas para este dia
-        analysts.forEach(analyst => {
+        // Adicionar tarefas para este dia - FILTRADAS
+        analystsToShow.forEach(analyst => {
             const capacity = analystCapacities[analyst.nome];
             if (capacity && capacity.tasks) {
                 capacity.tasks.forEach(task => {
@@ -383,10 +450,19 @@ function updateAnalystCapacities() {
     Object.keys(analystCapacities).forEach(analystName => {
         const capacity = analystCapacities[analystName];
         capacity.allocatedHours = 0;
+        capacity.projectHours = 0;
+        capacity.sustentacaoHours = 0;
         
         if (capacity.tasks) {
             capacity.tasks.forEach(task => {
                 capacity.allocatedHours += task.horasEstimadas || 0;
+                
+                // Contar horas por tipo
+                if (task.tipo === 'projeto') {
+                    capacity.projectHours += task.horasEstimadas || 0;
+                } else if (task.tipo === 'sustentacao') {
+                    capacity.sustentacaoHours += task.horasEstimadas || 0;
+                }
             });
         }
     });
@@ -442,6 +518,13 @@ function filterCalendar() {
                 // Adicionar à capacidade do analista
                 analystCapacities[task.analista].tasks.push(dailyTask);
                 analystCapacities[task.analista].allocatedHours += dailyTask.horasEstimadas;
+                
+                // Contar horas por tipo
+                if (task.tipo === 'projeto') {
+                    analystCapacities[task.analista].projectHours += dailyTask.horasEstimadas;
+                } else if (task.tipo === 'sustentacao') {
+                    analystCapacities[task.analista].sustentacaoHours += dailyTask.horasEstimadas;
+                }
             }
         }
     });
@@ -455,7 +538,6 @@ function filterCalendar() {
 // Funções de planejamento
 async function loadPlanning() {
     const dataInicio = document.getElementById('dataInicio').value;
-    const numSemanas = parseInt(document.getElementById('numSemanas').value);
     
     if (!dataInicio) {
         alert('Por favor, selecione uma data de início.');

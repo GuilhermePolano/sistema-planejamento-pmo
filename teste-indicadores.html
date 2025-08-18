@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teste - Aplicação PMO</title>
+    <title>Teste - Indicadores de Projetos</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -67,31 +67,6 @@
             background: #229954;
             transform: translateY(-2px);
         }
-        .btn-warning {
-            background: #f39c12;
-            color: white;
-        }
-        .btn-warning:hover {
-            background: #e67e22;
-            transform: translateY(-2px);
-        }
-        pre {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 5px;
-            overflow-x: auto;
-            border: 1px solid #e9ecef;
-        }
-        .status-indicator {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 8px;
-        }
-        .status-online { background: #27ae60; }
-        .status-offline { background: #e74c3c; }
-        .status-warning { background: #f39c12; }
         .links-section {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -119,58 +94,61 @@
             color: #666;
             margin-top: 10px;
         }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border: 1px solid #e9ecef;
+            max-height: 300px;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🧪 Teste - Aplicação PMO FIERGS</h1>
+        <h1>🧪 Teste - Indicadores de Projetos</h1>
         
         <div class="test-section info">
-            <h3><span class="status-indicator status-online"></span>Status do Servidor</h3>
-            <p>Servidor rodando na porta 3000 - Aplicação ativa!</p>
+            <h3>📊 Status da Aplicação</h3>
+            <p>Servidor rodando na porta 3000 - Testando nova funcionalidade de indicadores!</p>
         </div>
 
         <div class="test-section">
-            <h3>1. Testar APIs Básicas</h3>
-            <button class="btn-primary" onclick="testarAPIsBasicas()">Testar APIs</button>
-            <div id="result-apis"></div>
+            <h3>1. Testar API de Indicadores</h3>
+            <button class="btn-primary" onclick="testarAPIIndicadores()">Testar API</button>
+            <div id="result-api"></div>
         </div>
 
         <div class="test-section">
-            <h3>2. Testar Indicadores de Projetos</h3>
-            <button class="btn-primary" onclick="testarIndicadores()">Testar Indicadores</button>
-            <div id="result-indicadores"></div>
-        </div>
-
-        <div class="test-section">
-            <h3>3. Testar Sistema de Comentários</h3>
+            <h3>2. Testar Sistema de Comentários</h3>
             <button class="btn-primary" onclick="testarComentarios()">Testar Comentários</button>
             <div id="result-comentarios"></div>
         </div>
 
         <div class="test-section">
-            <h3>4. Testar Exportação de Relatórios</h3>
+            <h3>3. Testar Lista de Projetos</h3>
+            <button class="btn-primary" onclick="testarListaProjetos()">Testar Lista</button>
+            <div id="result-lista"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>4. Testar Exportação</h3>
             <button class="btn-success" onclick="testarExportacao()">Testar Exportação</button>
             <div id="result-exportacao"></div>
         </div>
 
-        <div class="test-section">
-            <h3>5. Testar Métricas de Tendência</h3>
-            <button class="btn-warning" onclick="testarMetricasTendencia()">Testar Métricas</button>
-            <div id="result-metricas"></div>
-        </div>
-
         <div class="links-section">
+            <div class="link-card">
+                <h4>📈 Nova Tela de Indicadores</h4>
+                <a href="/indicadores-projetos.html" target="_blank">Abrir Indicadores</a>
+                <p>Tela completa com KPIs, gráficos e comentários</p>
+            </div>
+            
             <div class="link-card">
                 <h4>📊 Dashboard Principal</h4>
                 <a href="/dashboard.html" target="_blank">Abrir Dashboard</a>
                 <p>Dashboard principal com estatísticas gerais</p>
-            </div>
-            
-            <div class="link-card">
-                <h4>📈 Indicadores de Projetos</h4>
-                <a href="/indicadores-projetos.html" target="_blank">Abrir Indicadores</a>
-                <p>Nova tela de indicadores com melhorias</p>
             </div>
             
             <div class="link-card">
@@ -188,50 +166,9 @@
     </div>
 
     <script>
-        async function testarAPIsBasicas() {
-            const resultDiv = document.getElementById('result-apis');
-            resultDiv.innerHTML = '<p>🔄 Testando APIs...</p>';
-            
-            try {
-                // Testar status do sistema
-                const statusResponse = await fetch('/api/system-status');
-                const statusData = await statusResponse.json();
-                
-                // Testar dados do dashboard
-                const dashboardResponse = await fetch('/api/dashboard-data');
-                const dashboardData = await dashboardResponse.json();
-                
-                // Testar estatísticas
-                const statsResponse = await fetch('/api/stats');
-                const statsData = await statsResponse.json();
-                
-                let result = '<div class="success">';
-                result += '<h4>✅ APIs Básicas - Funcionando!</h4>';
-                result += '<p><strong>Status do Sistema:</strong> ' + (statusData.success ? 'OK' : 'ERRO') + '</p>';
-                result += '<p><strong>Dados do Dashboard:</strong> ' + (dashboardData.success ? 'OK' : 'ERRO') + '</p>';
-                result += '<p><strong>Estatísticas:</strong> ' + (statsData.success ? 'OK' : 'ERRO') + '</p>';
-                
-                if (statsData.success) {
-                    result += '<h5>📊 Resumo dos Dados:</h5>';
-                    result += '<ul>';
-                    result += '<li>Projetos: ' + statsData.data.totalProjetos + '</li>';
-                    result += '<li>Tarefas: ' + statsData.data.totalTarefas + '</li>';
-                    result += '<li>Analistas: ' + statsData.data.totalAnalistas + '</li>';
-                    result += '<li>Tarefas Atrasadas: ' + statsData.data.tarefasAtrasadas + '</li>';
-                    result += '</ul>';
-                }
-                
-                result += '</div>';
-                resultDiv.innerHTML = result;
-                
-            } catch (error) {
-                resultDiv.innerHTML = '<div class="error"><h4>❌ Erro ao testar APIs</h4><p>' + error.message + '</p></div>';
-            }
-        }
-
-        async function testarIndicadores() {
-            const resultDiv = document.getElementById('result-indicadores');
-            resultDiv.innerHTML = '<p>🔄 Testando Indicadores...</p>';
+        async function testarAPIIndicadores() {
+            const resultDiv = document.getElementById('result-api');
+            resultDiv.innerHTML = '<p>🔄 Testando API de Indicadores...</p>';
             
             try {
                 const response = await fetch('/api/indicadores-projetos');
@@ -239,11 +176,13 @@
                 
                 if (data.success) {
                     let result = '<div class="success">';
-                    result += '<h4>✅ Indicadores de Projetos - Funcionando!</h4>';
+                    result += '<h4>✅ API de Indicadores - Funcionando!</h4>';
                     result += '<h5>📊 Resumo dos Indicadores:</h5>';
                     result += '<ul>';
                     result += '<li>Total de Projetos: ' + data.data.totalProjetos + '</li>';
                     result += '<li>Projetos Atrasados: ' + data.data.projetosAtrasados + '</li>';
+                    result += '<li>Projetos em Atenção: ' + data.data.projetosAtencao + '</li>';
+                    result += '<li>Projetos no Prazo: ' + data.data.projetosNoPrazo + '</li>';
                     result += '<li>Taxa de Conclusão: ' + data.data.taxaConclusao + '%</li>';
                     result += '<li>Capacidade Utilizada: ' + data.data.capacidadeUtilizada + '%</li>';
                     result += '<li>Histórias: ' + data.data.tarefasHistorias + '</li>';
@@ -262,10 +201,10 @@
                     result += '</div>';
                     resultDiv.innerHTML = result;
                 } else {
-                    resultDiv.innerHTML = '<div class="error"><h4>❌ Erro nos Indicadores</h4><p>' + data.message + '</p></div>';
+                    resultDiv.innerHTML = '<div class="error"><h4>❌ Erro na API</h4><p>' + data.message + '</p></div>';
                 }
             } catch (error) {
-                resultDiv.innerHTML = '<div class="error"><h4>❌ Erro ao testar Indicadores</h4><p>' + error.message + '</p></div>';
+                resultDiv.innerHTML = '<div class="error"><h4>❌ Erro ao testar API</h4><p>' + error.message + '</p></div>';
             }
         }
 
@@ -313,22 +252,59 @@
             }
         }
 
+        async function testarListaProjetos() {
+            const resultDiv = document.getElementById('result-lista');
+            resultDiv.innerHTML = '<p>🔄 Testando Lista de Projetos...</p>';
+            
+            try {
+                const response = await fetch('/api/projetos-lista');
+                const data = await response.json();
+                
+                if (data.success) {
+                    let result = '<div class="success">';
+                    result += '<h4>✅ Lista de Projetos - Funcionando!</h4>';
+                    result += '<h5>📋 Projetos Disponíveis:</h5>';
+                    result += '<ul>';
+                    data.data.projetos.slice(0, 5).forEach(projeto => {
+                        result += '<li>' + projeto.nome + ' (Squad: ' + (projeto.squad || 'N/A') + ')</li>';
+                    });
+                    if (data.data.projetos.length > 5) {
+                        result += '<li>... e mais ' + (data.data.projetos.length - 5) + ' projetos</li>';
+                    }
+                    result += '</ul>';
+                    
+                    result += '<h5>👥 Squads Disponíveis:</h5>';
+                    result += '<ul>';
+                    data.data.squads.forEach(squad => {
+                        result += '<li>' + squad + '</li>';
+                    });
+                    result += '</ul>';
+                    
+                    result += '</div>';
+                    resultDiv.innerHTML = result;
+                } else {
+                    resultDiv.innerHTML = '<div class="error"><h4>❌ Erro na Lista</h4><p>' + data.message + '</p></div>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '<div class="error"><h4>❌ Erro ao testar Lista</h4><p>' + error.message + '</p></div>';
+            }
+        }
+
         async function testarExportacao() {
             const resultDiv = document.getElementById('result-exportacao');
             resultDiv.innerHTML = '<p>🔄 Testando Exportação...</p>';
             
             try {
-                // Testar exportação CSV
-                const csvResponse = await fetch('/api/exportar-relatorio?formato=csv');
+                const response = await fetch('/api/exportar-relatorio?formato=csv');
                 
-                if (csvResponse.ok) {
-                    const csvBlob = await csvResponse.blob();
-                    const csvUrl = URL.createObjectURL(csvBlob);
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
                     
                     let result = '<div class="success">';
                     result += '<h4>✅ Exportação - Funcionando!</h4>';
                     result += '<p>Relatório CSV gerado com sucesso!</p>';
-                    result += '<p><a href="' + csvUrl + '" download="relatorio-projetos.csv" class="btn-success">📥 Download CSV</a></p>';
+                    result += '<p><a href="' + url + '" download="relatorio-projetos.csv" class="btn-success">📥 Download CSV</a></p>';
                     result += '</div>';
                     resultDiv.innerHTML = result;
                 } else {
@@ -339,40 +315,10 @@
             }
         }
 
-        async function testarMetricasTendencia() {
-            const resultDiv = document.getElementById('result-metricas');
-            resultDiv.innerHTML = '<p>🔄 Testando Métricas de Tendência...</p>';
-            
-            try {
-                const response = await fetch('/api/metricas-tendencia?periodo=30d');
-                const data = await response.json();
-                
-                if (data.success) {
-                    let result = '<div class="success">';
-                    result += '<h4>✅ Métricas de Tendência - Funcionando!</h4>';
-                    result += '<h5>📈 Métricas dos Últimos 30 Dias:</h5>';
-                    result += '<ul>';
-                    result += '<li>Projetos Iniciados: ' + data.data.projetosIniciados + '</li>';
-                    result += '<li>Projetos Concluídos: ' + data.data.projetosConcluidos + '</li>';
-                    result += '<li>Tarefas Criadas: ' + data.data.tarefasCriadas + '</li>';
-                    result += '<li>Tarefas Concluídas: ' + data.data.tarefasConcluidas + '</li>';
-                    result += '<li>Velocidade Média: ' + data.data.velocidadeMedia + ' tarefas/dia</li>';
-                    result += '<li>Tendência: ' + data.data.tendencia + '</li>';
-                    result += '</ul>';
-                    result += '</div>';
-                    resultDiv.innerHTML = result;
-                } else {
-                    resultDiv.innerHTML = '<div class="error"><h4>❌ Erro nas Métricas</h4><p>' + data.message + '</p></div>';
-                }
-            } catch (error) {
-                resultDiv.innerHTML = '<div class="error"><h4>❌ Erro ao testar Métricas</h4><p>' + error.message + '</p></div>';
-            }
-        }
-
         // Executar testes automáticos ao carregar a página
         window.onload = function() {
             setTimeout(() => {
-                testarAPIsBasicas();
+                testarAPIIndicadores();
             }, 1000);
         };
     </script>

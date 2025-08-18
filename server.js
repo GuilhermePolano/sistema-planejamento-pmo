@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 require('dotenv').config({ path: './config.env' });
 
-// Importar rotas da API
+// Importar rotas da API - CORRIGIDO: usar api.js em vez de api-temp.js
 const apiRoutes = require('./routes/api');
 
 const app = express();
@@ -36,12 +36,12 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Servir arquivos estáticos
-app.use(express.static(path.join(__dirname)));
-
 // Usar rotas da API
 app.use('/api', apiRoutes);
 app.use('/api/planejamento', require('./routes/planejamento'));
+
+// Servir arquivos estáticos (após as rotas da API)
+app.use(express.static(path.join(__dirname)));
 
 // Rota para servir o arquivo JSON de dados
 app.get('/data/dashboard-data.json', (req, res) => {
@@ -58,6 +58,21 @@ app.get('/data/dashboard-data.json', (req, res) => {
     }
 });
 
+// Rota para servir o arquivo JSON de planejamento
+app.get('/data/planejamento-semanal.json', (req, res) => {
+    const jsonPath = path.join(__dirname, 'data', 'planejamento-semanal.json');
+    
+    if (fs.existsSync(jsonPath)) {
+        res.setHeader('Content-Type', 'application/json');
+        res.sendFile(jsonPath);
+    } else {
+        res.status(404).json({
+            success: false,
+            message: 'Arquivo de planejamento não encontrado.'
+        });
+    }
+});
+
 // Rota principal - serve o dashboard
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'dashboard.html'));
@@ -68,6 +83,11 @@ app.get('/upload', (req, res) => {
     res.sendFile(path.join(__dirname, 'upload.html'));
 });
 
+// Rota para planejamento semanal
+app.get('/planejamento-semanal', (req, res) => {
+    res.sendFile(path.join(__dirname, 'planejamento-semanal.html'));
+});
+
 // Rota para teste das melhorias implementadas
 app.get('/teste-melhorias', (req, res) => {
     res.sendFile(path.join(__dirname, 'teste-melhorias.html'));
@@ -76,6 +96,31 @@ app.get('/teste-melhorias', (req, res) => {
 // Rota para debug específico do projeto APP Tracker
 app.get('/debug-projeto', (req, res) => {
     res.sendFile(path.join(__dirname, 'teste-debug-projeto.html'));
+});
+
+// Rota para indicadores de projetos
+app.get('/indicadores-projetos', (req, res) => {
+    res.sendFile(path.join(__dirname, 'indicadores-projetos.html'));
+});
+
+// Rota para teste de rotas de indicadores
+app.get('/teste-rota-indicadores', (req, res) => {
+    res.sendFile(path.join(__dirname, 'teste-rota-indicadores.html'));
+});
+
+// Rota para teste de gráficos
+app.get('/teste-graficos', (req, res) => {
+    res.sendFile(path.join(__dirname, 'teste-graficos.html'));
+});
+
+// Rota para teste das rotas corrigidas
+app.get('/teste-rotas-corrigidas', (req, res) => {
+    res.sendFile(path.join(__dirname, 'teste-rotas-corrigidas.html'));
+});
+
+// Rota para teste da aplicação
+app.get('/teste-aplicacao', (req, res) => {
+    res.sendFile(path.join(__dirname, 'teste-aplicacao.html'));
 });
 
 // Middleware de tratamento de erros
@@ -103,10 +148,12 @@ app.listen(PORT, () => {
     console.log(`📤 Upload de arquivos em: http://localhost:${PORT}/upload`);
     console.log(`🔄 Reprocessar dados: http://localhost:${PORT}/api/reprocess-data`);
     console.log(`📄 Dados JSON: http://localhost:${PORT}/data/dashboard-data.json`);
-    console.log(`📅 Planejamento Semanal: http://localhost:${PORT}/planejamento-semanal.html`);
+    console.log(`📅 Planejamento Semanal: http://localhost:${PORT}/planejamento-semanal`);
     console.log(`🧪 Teste da Aplicação: http://localhost:${PORT}/teste-aplicacao.html`);
     console.log(`🧪 Teste das Melhorias: http://localhost:${PORT}/teste-melhorias`);
     console.log(`🔍 Debug Projeto: http://localhost:${PORT}/debug-projeto`);
+    console.log(`📊 Indicadores de Projetos: http://localhost:${PORT}/indicadores-projetos`);
+    console.log(`🧪 Teste de Rotas: http://localhost:${PORT}/teste-rotas-corrigidas`);
     console.log(`📊 Status do Sistema: http://localhost:${PORT}/api/system-status`);
     console.log(`🔄 Recálculo de Status: http://localhost:${PORT}/api/recalcular-status-projetos`);
 });
