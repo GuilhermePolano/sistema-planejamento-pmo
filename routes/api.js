@@ -1768,4 +1768,142 @@ function calcularProgressoProjeto(projeto) {
     return total > 0 ? Math.round((concluidas / total) * 100) : 0;
 }
 
+// Rota otimizada para carregamento rápido com filtros interdependentes
+router.get('/dados-otimizados', async (req, res) => {
+    try {
+        console.log('⚡ Carregamento otimizado iniciado...');
+        
+        const jsonPath = path.join(__dirname, '../data/dashboard-data.json');
+        
+        if (!fs.existsSync(jsonPath)) {
+            return res.status(404).json({
+                success: false,
+                message: 'Arquivo de dados não encontrado'
+            });
+        }
+
+        const data = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'));
+        
+        // Carregar analistas
+        const analysts = data.analistas || [];
+        
+        // Carregar projetos com mapeamento
+        const projects = data.projetos || [];
+        
+        // Criar mapeamentos para filtros interdependentes
+        const projectAnalystMapping = {};
+        const analystProjectMapping = {};
+        
+        projects.forEach(project => {
+            if (project.analistas && Array.isArray(project.analistas)) {
+                projectAnalystMapping[project.nome] = [...project.analistas];
+                
+                project.analistas.forEach(analystName => {
+                    if (!analystProjectMapping[analystName]) {
+                        analystProjectMapping[analystName] = [];
+                    }
+                    if (!analystProjectMapping[analystName].includes(project.nome)) {
+                        analystProjectMapping[analystName].push(project.nome);
+                    }
+                });
+            }
+        });
+        
+        // Carregar tarefas (limitado para performance)
+        const tasks = [];
+        
+        if (data.projetos && Array.isArray(data.projetos)) {
+            data.projetos.slice(0, 30).forEach(projeto => {
+                if (projeto.tarefasDetalhadas && Array.isArray(projeto.tarefasDetalhadas)) {
+                    projeto.tarefasDetalhadas.slice(0, 10).forEach(tarefa => {
+                        if (tarefa.titulo && tarefa.analista) {
+                            tasks.push({
+                                id: `projeto_${projeto.nome}_${tarefa.titulo}`,
+                                titulo: tarefa.titulo,
+                                analista: tarefa.analista,
+                                projeto: projeto.nome,
+                                tipo: 'projeto',
+                                status: tarefa.status || 'Backlog',
+                                dataInicio: tarefa.inicio || '2025-01-01',
+                                dataFim: tarefa.fim || '2025-12-31',
+                                horasEstimadas: 8
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        // Carregar tarefas de sustentação
+        if (data.sustentacoes && Array.isArray(data.sustentacoes)) {
+            data.sustentacoes.slice(0, 10).forEach(sustentacao => {
+                if (sustentacao.tarefasDetalhadas && Array.isArray(sustentacao.tarefasDetalhadas)) {
+                    sustentacao.tarefasDetalhadas.slice(0, 5).forEach(tarefa => {
+                        if (tarefa.titulo && tarefa.analista) {
+                            tasks.push({
+                                id: `sustentacao_${sustentacao.nome}_${tarefa.titulo}`,
+                                titulo: tarefa.titulo,
+                                analista: tarefa.analista,
+                                projeto: sustentacao.nome,
+                                tipo: 'sustentacao',
+                                status: tarefa.status || 'Backlog',
+                                dataInicio: tarefa.inicio || '2025-01-01',
+                                dataFim: tarefa.fim || '2025-12-31',
+                                horasEstimadas: 8,
+                                po: sustentacao.po || 'N/A'
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        // ✅ CALCULAR ESTATÍSTICAS POR ANALISTA
+        const analystStats = {};
+        analysts.forEach(analyst => {
+            const analystTasks = tasks.filter(task => task.analista === analyst.nome);
+            const projectTasks = analystTasks.filter(task => task.tipo === 'projeto');
+            const sustentacaoTasks = analystTasks.filter(task => task.tipo === 'sustentacao');
+            
+            const totalHours = analystTasks.reduce((sum, task) => sum + (task.horasEstimadas || 0), 0);
+            const projectHours = projectTasks.reduce((sum, task) => sum + (task.horasEstimadas || 0), 0);
+            const sustentacaoHours = sustentacaoTasks.reduce((sum, task) => sum + (task.horasEstimadas || 0), 0);
+            
+            analystStats[analyst.nome] = {
+                totalTasks: analystTasks.length,
+                projectTasks: projectTasks.length,
+                sustentacaoTasks: sustentacaoTasks.length,
+                totalHours: totalHours,
+                projectHours: projectHours,
+                sustentacaoHours: sustentacaoHours,
+                projectPercentage: totalHours > 0 ? Math.round((projectHours / totalHours) * 100) : 0,
+                sustentacaoPercentage: totalHours > 0 ? Math.round((sustentacaoHours / totalHours) * 100) : 0
+            };
+        });
+
+        console.log(`⚡ Dados otimizados carregados: ${analysts.length} analistas, ${projects.length} projetos, ${tasks.length} tarefas`);
+
+        res.json({
+            success: true,
+            data: {
+                analysts: analysts,
+                projects: projects,
+                tasks: tasks,
+                projectAnalystMapping: projectAnalystMapping,
+                analystProjectMapping: analystProjectMapping,
+                analystStats // ✅ Incluir estatísticas
+            },
+            message: 'Dados carregados com sucesso (versão otimizada)'
+        });
+
+    } catch (error) {
+        console.error('❌ Erro no carregamento otimizado:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro interno do servidor',
+            error: error.message
+        });
+    }
+});
+
 module.exports = router; 

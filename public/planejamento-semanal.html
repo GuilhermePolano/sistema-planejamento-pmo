@@ -761,6 +761,12 @@
                     </select>
                 </div>
                 <div class="control-group">
+                    <label for="filtroProjeto">Filtrar Projeto:</label>
+                    <select id="filtroProjeto">
+                        <option value="">Todos os Projetos</option>
+                    </select>
+                </div>
+                <div class="control-group">
                     <label for="filtroTipo">Filtrar Tipo:</label>
                     <select id="filtroTipo">
                         <option value="">Todos os Tipos</option>
@@ -861,6 +867,12 @@
         }
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.2/dragula.min.js"></script>
-    <script src="planejamento-semanal.js"></script>
+    <!-- Módulos refatorados -->
+    <script src="assets/js/calendarManager.js"></script>
+    <script src="assets/js/taskManager.js"></script>
+    <script src="assets/js/filterManager.js"></script>
+    <script src="assets/js/dragDropManager.js"></script>
+    <script src="assets/js/pmoDashboard.js"></script>
+    <script src="assets/js/planejamento-semanal-refatorado.js"></script>
 </body>
 </html>

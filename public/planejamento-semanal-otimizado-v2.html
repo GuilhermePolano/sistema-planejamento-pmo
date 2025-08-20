@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PMO Dashboard - Otimizado v2.0</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #8b5cf6 100%);
+            min-height: 100vh;
+            color: white;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.8;
+            font-size: 1.1em;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .kpi-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .kpi-label {
+            opacity: 0.8;
+            font-size: 1em;
+        }
+
+        .analyst-stats {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .analyst-stats h2 {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .analyst-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .analyst-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .analyst-name {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #60a5fa;
+        }
+
+        .analyst-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .metric {
+            text-align: center;
+            padding: 8px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .metric-value {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .metric-label {
+            font-size: 0.8em;
+            opacity: 0.7;
+        }
+
+        .percentage-bars {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .percentage-bar {
+            height: 8px;
+            border-radius: 4px;
+            flex: 1;
+        }
+
+        .bar-projeto {
+            background: linear-gradient(90deg, #10b981, #059669);
+        }
+
+        .bar-sustentacao {
+            background: linear-gradient(90deg, #f59e0b, #d97706);
+        }
+
+        .controls {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .controls h2 {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            margin-bottom: 5px;
+            opacity: 0.8;
+        }
+
+        .filter-group select {
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 14px;
+        }
+
+        .filter-group select option {
+            background: #1e40af;
+            color: white;
+        }
+
+        .calendar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .calendar h2 {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .week-selector {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .week-nav {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .week-nav:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .current-week {
+            font-weight: bold;
+            font-size: 1.1em;
+            min-width: 200px;
+            text-align: center;
+        }
+
+        .week-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+        }
+
+        .day-column {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            min-height: 200px;
+        }
+
+        .day-header {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .task-item {
+            background: rgba(16, 185, 129, 0.3);
+            border: 1px solid rgba(16, 185, 129, 0.5);
+            border-radius: 8px;
+            padding: 8px;
+            margin-bottom: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .task-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .task-item.sustentacao {
+            background: rgba(245, 158, 11, 0.3);
+            border: 1px solid rgba(245, 158, 11, 0.5);
+        }
+
+        .status {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .status h2 {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .status-success {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.5);
+        }
+
+        .status-error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: rgba(59, 130, 246, 0.8);
+            border-color: rgba(59, 130, 246, 0.9);
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 10px; }
+            .kpi-grid { grid-template-columns: 1fr; }
+            .filters { grid-template-columns: 1fr; }
+            .week-grid { grid-template-columns: 1fr; }
+            .analyst-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>⚡ PMO Dashboard v2.0</h1>
+            <p>Planejamento Semanal - Versão Otimizada com Indicadores de Percentual</p>
+        </div>
+
+        <!-- Status de Conexão -->
+        <div class="status">
+            <h2><i class="fas fa-info-circle"></i> Status do Sistema</h2>
+            <div id="status-message" class="status-message status-error">
+                <strong>⚡ Inicializando...</strong><br>
+                <div class="loading"></div> Carregando dados otimizados...
+            </div>
+        </div>
+
+        <!-- KPIs -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-number" id="total-analistas">-</div>
+                <div class="kpi-label">Total Analistas</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-number" id="capacidade-total">-</div>
+                <div class="kpi-label">Capacidade Total</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-number" id="utilizacao-media">-</div>
+                <div class="kpi-label">Utilização Média</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-number" id="tarefas-ativas">-</div>
+                <div class="kpi-label">Tarefas Ativas</div>
+            </div>
+        </div>
+
+        <!-- Estatísticas dos Analistas -->
+        <div class="analyst-stats">
+            <h2><i class="fas fa-users"></i> Estatísticas dos Analistas</h2>
+            <div class="analyst-grid" id="analyst-grid">
+                <!-- Preenchido dinamicamente -->
+            </div>
+        </div>
+
+        <!-- Controles -->
+        <div class="controls">
+            <h2><i class="fas fa-sliders-h"></i> Controles de Filtro (Interdependentes)</h2>
+            <div class="filters">
+                <div class="filter-group">
+                    <label>Analista</label>
+                    <select id="filtro-analista" onchange="filterCalendar()">
+                        <option value="">Todos os Analistas</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Projeto</label>
+                    <select id="filtro-projeto" onchange="filterCalendar()">
+                        <option value="">Todos os Projetos</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Tipo</label>
+                    <select id="filtro-tipo" onchange="filterCalendar()">
+                        <option value="">Todos os Tipos</option>
+                        <option value="projeto">Projetos</option>
+                        <option value="sustentacao">Sustentação</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-primary" onclick="carregarDados()">
+                        <i class="fas fa-sync"></i> Recarregar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendário -->
+        <div class="calendar">
+            <h2><i class="fas fa-calendar"></i> Planejamento Semanal</h2>
+            
+            <!-- Seletor de Semana -->
+            <div class="week-selector">
+                <button class="week-nav" onclick="previousWeek()">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="current-week" id="current-week">
+                    Semana de 01/01/2025
+                </div>
+                <button class="week-nav" onclick="nextWeek()">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <div class="week-grid" id="week-grid">
+                <div class="day-column">
+                    <div class="day-header">Segunda</div>
+                    <div class="day-tasks"></div>
+                </div>
+                <div class="day-column">
+                    <div class="day-header">Terça</div>
+                    <div class="day-tasks"></div>
+                </div>
+                <div class="day-column">
+                    <div class="day-header">Quarta</div>
+                    <div class="day-tasks"></div>
+                </div>
+                <div class="day-column">
+                    <div class="day-header">Quinta</div>
+                    <div class="day-tasks"></div>
+                </div>
+                <div class="day-column">
+                    <div class="day-header">Sexta</div>
+                    <div class="day-tasks"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variáveis globais
+        let analysts = [];
+        let projects = [];
+        let originalTasks = [];
+        let availableTasks = [];
+        let projectAnalystMapping = {};
+        let analystProjectMapping = {};
+        let analystStats = {};
+        let currentWeekStart = new Date();
+        currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay() + 1); // Segunda-feira
+
+        // Função para carregar dados otimizados
+        async function carregarDados() {
+            const statusElement = document.getElementById('status-message');
+            statusElement.innerHTML = '<strong>⚡ Carregando dados otimizados...</strong><br><div class="loading"></div> Aguarde...';
+            
+            try {
+                console.log('⚡ Iniciando carregamento otimizado...');
+                
+                const response = await fetch('/api/dados-otimizados');
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Carregar dados
+                    analysts = data.data.analysts;
+                    projects = data.data.projects;
+                    originalTasks = data.data.tasks;
+                    availableTasks = [...originalTasks];
+                    projectAnalystMapping = data.data.projectAnalystMapping;
+                    analystProjectMapping = data.data.analystProjectMapping;
+                    analystStats = data.data.analystStats || {};
+                    
+                    console.log('✅ Dados carregados:', {
+                        analysts: analysts.length,
+                        projects: projects.length,
+                        tasks: originalTasks.length,
+                        stats: Object.keys(analystStats).length
+                    });
+                    
+                    // Atualizar interface
+                    atualizarInterface();
+                    atualizarFiltros();
+                    atualizarEstatisticasAnalistas();
+                    atualizarCalendario();
+                    
+                    statusElement.className = 'status-message status-success';
+                    statusElement.innerHTML = `<strong>✅ Carregamento otimizado concluído!</strong><br>Analistas: ${analysts.length} | Projetos: ${projects.length} | Tarefas: ${originalTasks.length}`;
+                } else {
+                    throw new Error(data.message || 'Erro ao carregar dados');
+                }
+            } catch (error) {
+                console.error('❌ Erro:', error);
+                statusElement.className = 'status-message status-error';
+                statusElement.innerHTML = `<strong>⚠️ Erro no carregamento</strong><br>Erro: ${error.message}`;
+            }
+        }
+
+        // Função para atualizar filtros
+        function atualizarFiltros() {
+            const analystSelect = document.getElementById('filtro-analista');
+            const projectSelect = document.getElementById('filtro-projeto');
+            
+            // Limpar e recriar opções
+            analystSelect.innerHTML = '<option value="">Todos os Analistas</option>';
+            projectSelect.innerHTML = '<option value="">Todos os Projetos</option>';
+            
+            // Adicionar analistas
+            analysts.forEach(analyst => {
+                const option = document.createElement('option');
+                option.value = analyst.nome;
+                option.textContent = analyst.nome;
+                analystSelect.appendChild(option);
+            });
+            
+            // Adicionar projetos
+            projects.forEach(project => {
+                const option = document.createElement('option');
+                option.value = project.nome;
+                option.textContent = project.nome;
+                projectSelect.appendChild(option);
+            });
+        }
+
+        // Função filterCalendar
+        function filterCalendar() {
+            const filtroAnalista = document.getElementById('filtro-analista').value;
+            const filtroProjeto = document.getElementById('filtro-projeto').value;
+            const filtroTipo = document.getElementById('filtro-tipo').value;
+            
+            console.log('🔍 Aplicando filtros:', { filtroAnalista, filtroProjeto, filtroTipo });
+            
+            // Aplicar lógica de filtros interdependentes
+            updateFilterOptions(filtroAnalista, filtroProjeto);
+            
+            // Resetar tarefas disponíveis para os filtros
+            availableTasks = [...originalTasks];
+            
+            // Aplicar filtros nas tarefas disponíveis
+            if (filtroAnalista) {
+                availableTasks = availableTasks.filter(task => task.analista === filtroAnalista);
+                console.log(`📊 Filtrado por analista "${filtroAnalista}": ${availableTasks.length} tarefas`);
+            }
+            
+            if (filtroProjeto) {
+                availableTasks = availableTasks.filter(task => task.projeto === filtroProjeto);
+                console.log(`📊 Filtrado por projeto "${filtroProjeto}": ${availableTasks.length} tarefas`);
+            }
+            
+            if (filtroTipo) {
+                availableTasks = availableTasks.filter(task => task.tipo === filtroTipo);
+                console.log(`📊 Filtrado por tipo "${filtroTipo}": ${availableTasks.length} tarefas`);
+            }
+            
+            // Atualizar interface
+            atualizarInterface();
+            atualizarCalendario();
+            
+            console.log('✅ Filtros aplicados com sucesso');
+        }
+
+        // Função updateFilterOptions
+        function updateFilterOptions(selectedAnalyst, selectedProject) {
+            const analystSelect = document.getElementById('filtro-analista');
+            const projectSelect = document.getElementById('filtro-projeto');
+            
+            // Salvar valores atuais
+            const currentAnalyst = analystSelect.value;
+            const currentProject = projectSelect.value;
+            
+            // Atualizar opções do filtro de projeto baseado no analista selecionado
+            if (selectedAnalyst) {
+                // Filtrar projetos que contêm o analista selecionado
+                const availableProjects = analystProjectMapping[selectedAnalyst] || [];
+                
+                // Limpar e recriar opções do projeto
+                projectSelect.innerHTML = '<option value="">Todos os Projetos</option>';
+                availableProjects.forEach(projectName => {
+                    const option = document.createElement('option');
+                    option.value = projectName;
+                    option.textContent = projectName;
+                    projectSelect.appendChild(option);
+                });
+                
+                console.log(`📊 Projetos disponíveis para "${selectedAnalyst}":`, availableProjects);
+            } else {
+                // Se nenhum analista está selecionado, mostrar todos os projetos
+                projectSelect.innerHTML = '<option value="">Todos os Projetos</option>';
+                projects.forEach(project => {
+                    const option = document.createElement('option');
+                    option.value = project.nome;
+                    option.textContent = project.nome;
+                    projectSelect.appendChild(option);
+                });
+            }
+            
+            // Atualizar opções do filtro de analista baseado no projeto selecionado
+            if (selectedProject) {
+                // Filtrar analistas que trabalham no projeto selecionado
+                const availableAnalysts = projectAnalystMapping[selectedProject] || [];
+                
+                // Limpar e recriar opções do analista
+                analystSelect.innerHTML = '<option value="">Todos os Analistas</option>';
+                availableAnalysts.forEach(analystName => {
+                    const option = document.createElement('option');
+                    option.value = analystName;
+                    option.textContent = analystName;
+                    analystSelect.appendChild(option);
+                });
+                
+                console.log(`📊 Analistas disponíveis para "${selectedProject}":`, availableAnalysts);
+            } else {
+                // Se nenhum projeto está selecionado, mostrar todos os analistas
+                analystSelect.innerHTML = '<option value="">Todos os Analistas</option>';
+                analysts.forEach(analyst => {
+                    const option = document.createElement('option');
+                    option.value = analyst.nome;
+                    option.textContent = analyst.nome;
+                    analystSelect.appendChild(option);
+                });
+            }
+            
+            // Restaurar valores se ainda são válidos
+            if (currentAnalyst && analystSelect.querySelector(`option[value="${currentAnalyst}"]`)) {
+                analystSelect.value = currentAnalyst;
+            }
+            if (currentProject && projectSelect.querySelector(`option[value="${currentProject}"]`)) {
+                projectSelect.value = currentProject;
+            }
+        }
+
+        // Função para atualizar interface
+        function atualizarInterface() {
+            // Atualizar KPIs
+            document.getElementById('total-analistas').textContent = analysts.length;
+            document.getElementById('capacidade-total').textContent = (analysts.length * 40) + 'h';
+            
+            const totalHoras = availableTasks.reduce((sum, task) => sum + (task.horasEstimadas || 0), 0);
+            const utilizacaoMedia = Math.round((totalHoras / (analysts.length * 40)) * 100);
+            document.getElementById('utilizacao-media').textContent = utilizacaoMedia + '%';
+            document.getElementById('tarefas-ativas').textContent = availableTasks.length;
+        }
+
+        // Função para atualizar estatísticas dos analistas
+        function atualizarEstatisticasAnalistas() {
+            const analystGrid = document.getElementById('analyst-grid');
+            analystGrid.innerHTML = '';
+
+            analysts.forEach(analyst => {
+                const stats = analystStats[analyst.nome] || {
+                    totalTasks: 0,
+                    projectTasks: 0,
+                    sustentacaoTasks: 0,
+                    totalHours: 0,
+                    projectHours: 0,
+                    sustentacaoHours: 0,
+                    projectPercentage: 0,
+                    sustentacaoPercentage: 0
+                };
+
+                const analystCard = document.createElement('div');
+                analystCard.className = 'analyst-card';
+                analystCard.innerHTML = `
+                    <div class="analyst-name">${analyst.nome}</div>
+                    <div class="analyst-metrics">
+                        <div class="metric">
+                            <div class="metric-value">${stats.totalTasks}</div>
+                            <div class="metric-label">Total Tarefas</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">${stats.totalHours}h</div>
+                            <div class="metric-label">Total Horas</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">${stats.projectPercentage}%</div>
+                            <div class="metric-label">Projetos</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">${stats.sustentacaoPercentage}%</div>
+                            <div class="metric-label">Sustentação</div>
+                        </div>
+                    </div>
+                    <div class="percentage-bars">
+                        <div class="percentage-bar bar-projeto" style="width: ${stats.projectPercentage}%"></div>
+                        <div class="percentage-bar bar-sustentacao" style="width: ${stats.sustentacaoPercentage}%"></div>
+                    </div>
+                `;
+                analystGrid.appendChild(analystCard);
+            });
+        }
+
+        // Funções de navegação do calendário
+        function previousWeek() {
+            currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+            atualizarCalendario();
+        }
+
+        function nextWeek() {
+            currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+            atualizarCalendario();
+        }
+
+        // Função para atualizar calendário
+        function atualizarCalendario() {
+            // Atualizar cabeçalho da semana
+            const weekEnd = new Date(currentWeekStart);
+            weekEnd.setDate(currentWeekStart.getDate() + 4); // Sexta-feira
+            
+            const weekText = `Semana de ${currentWeekStart.toLocaleDateString('pt-BR')} a ${weekEnd.toLocaleDateString('pt-BR')}`;
+            document.getElementById('current-week').textContent = weekText;
+
+            const dayTasks = document.querySelectorAll('.day-tasks');
+            dayTasks.forEach(day => day.innerHTML = '');
+
+            // Filtrar tarefas da semana atual
+            const weekEndDate = new Date(currentWeekStart);
+            weekEndDate.setDate(currentWeekStart.getDate() + 4);
+            
+            const weekTasks = availableTasks.filter(task => {
+                const taskStart = new Date(task.dataInicio);
+                const taskEnd = new Date(task.dataFim);
+                return taskStart <= weekEndDate && taskEnd >= currentWeekStart;
+            });
+
+            // Limitar a 50 tarefas para performance
+            const limitedTasks = weekTasks.slice(0, 50);
+            
+            limitedTasks.forEach(task => {
+                const startDate = new Date(task.dataInicio);
+                const endDate = new Date(task.dataFim);
+                const durationDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+                
+                for (let i = 0; i < durationDays; i++) {
+                    const taskDate = new Date(startDate);
+                    taskDate.setDate(startDate.getDate() + i);
+                    
+                    // Verificar se a data está na semana atual
+                    if (taskDate >= currentWeekStart && taskDate <= weekEndDate) {
+                        const dayIndex = taskDate.getDay() - 1; // Segunda = 0
+                        if (dayIndex >= 0 && dayIndex < 5) {
+                            const taskElement = document.createElement('div');
+                            taskElement.className = `task-item ${task.tipo === 'sustentacao' ? 'sustentacao' : ''}`;
+                            taskElement.innerHTML = `
+                                <strong>${task.titulo}</strong><br>
+                                <small>${task.analista}</small><br>
+                                <small>${task.horasEstimadas || 8}h</small>
+                            `;
+                            dayTasks[dayIndex].appendChild(taskElement);
+                        }
+                    }
+                }
+            });
+
+            // Adicionar indicador se há mais tarefas
+            if (weekTasks.length > 50) {
+                const indicator = document.createElement('div');
+                indicator.style.textAlign = 'center';
+                indicator.style.padding = '10px';
+                indicator.style.color = 'rgba(255,255,255,0.7)';
+                indicator.innerHTML = `... e mais ${weekTasks.length - 50} tarefas (use filtros para ver mais)`;
+                dayTasks[0].appendChild(indicator);
+            }
+        }
+
+        // Inicializar aplicação
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('⚡ Iniciando aplicação otimizada v2.0 com indicadores de percentual...');
+            carregarDados();
+        });
+    </script>
+</body>
+</html>

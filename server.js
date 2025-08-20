@@ -41,7 +41,8 @@ app.use('/api', apiRoutes);
 app.use('/api/planejamento', require('./routes/planejamento'));
 
 // Servir arquivos estáticos (após as rotas da API)
-app.use(express.static(path.join(__dirname)));
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname))); // Fallback para arquivos na raiz
 
 // Rota para servir o arquivo JSON de dados
 app.get('/data/dashboard-data.json', (req, res) => {
@@ -75,52 +76,37 @@ app.get('/data/planejamento-semanal.json', (req, res) => {
 
 // Rota principal - serve o dashboard
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'dashboard.html'));
+    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
 // Rota para upload de arquivo Excel (interface)
 app.get('/upload', (req, res) => {
-    res.sendFile(path.join(__dirname, 'upload.html'));
+    res.sendFile(path.join(__dirname, 'public', 'upload.html'));
 });
 
 // Rota para planejamento semanal
 app.get('/planejamento-semanal', (req, res) => {
-    res.sendFile(path.join(__dirname, 'planejamento-semanal.html'));
+    res.sendFile(path.join(__dirname, 'public', 'planejamento-semanal.html'));
 });
 
-// Rota para teste das melhorias implementadas
-app.get('/teste-melhorias', (req, res) => {
-    res.sendFile(path.join(__dirname, 'teste-melhorias.html'));
-});
-
-// Rota para debug específico do projeto APP Tracker
-app.get('/debug-projeto', (req, res) => {
-    res.sendFile(path.join(__dirname, 'teste-debug-projeto.html'));
+// Rota para planejamento semanal otimizado v2.0 (PRINCIPAL)
+app.get('/planejamento-semanal-otimizado-v2', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'planejamento-semanal-otimizado-v2.html'));
 });
 
 // Rota para indicadores de projetos
 app.get('/indicadores-projetos', (req, res) => {
-    res.sendFile(path.join(__dirname, 'indicadores-projetos.html'));
-});
-
-// Rota para teste de rotas de indicadores
-app.get('/teste-rota-indicadores', (req, res) => {
-    res.sendFile(path.join(__dirname, 'teste-rota-indicadores.html'));
-});
-
-// Rota para teste de gráficos
-app.get('/teste-graficos', (req, res) => {
-    res.sendFile(path.join(__dirname, 'teste-graficos.html'));
-});
-
-// Rota para teste das rotas corrigidas
-app.get('/teste-rotas-corrigidas', (req, res) => {
-    res.sendFile(path.join(__dirname, 'teste-rotas-corrigidas.html'));
+    res.sendFile(path.join(__dirname, 'public', 'indicadores-projetos.html'));
 });
 
 // Rota para teste da aplicação
 app.get('/teste-aplicacao', (req, res) => {
-    res.sendFile(path.join(__dirname, 'teste-aplicacao.html'));
+    res.sendFile(path.join(__dirname, 'public', 'teste-aplicacao.html'));
+});
+
+// Rota para teste das melhorias implementadas
+app.get('/teste-melhorias', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'teste-melhorias.html'));
 });
 
 // Middleware de tratamento de erros
@@ -149,11 +135,10 @@ app.listen(PORT, () => {
     console.log(`🔄 Reprocessar dados: http://localhost:${PORT}/api/reprocess-data`);
     console.log(`📄 Dados JSON: http://localhost:${PORT}/data/dashboard-data.json`);
     console.log(`📅 Planejamento Semanal: http://localhost:${PORT}/planejamento-semanal`);
-    console.log(`🧪 Teste da Aplicação: http://localhost:${PORT}/teste-aplicacao.html`);
+    console.log(`⚡ Planejamento Semanal (Otimizado v2.0 - PRINCIPAL): http://localhost:${PORT}/planejamento-semanal-otimizado-v2`);
+    console.log(`🧪 Teste da Aplicação: http://localhost:${PORT}/teste-aplicacao`);
     console.log(`🧪 Teste das Melhorias: http://localhost:${PORT}/teste-melhorias`);
-    console.log(`🔍 Debug Projeto: http://localhost:${PORT}/debug-projeto`);
     console.log(`📊 Indicadores de Projetos: http://localhost:${PORT}/indicadores-projetos`);
-    console.log(`🧪 Teste de Rotas: http://localhost:${PORT}/teste-rotas-corrigidas`);
     console.log(`📊 Status do Sistema: http://localhost:${PORT}/api/system-status`);
     console.log(`🔄 Recálculo de Status: http://localhost:${PORT}/api/recalcular-status-projetos`);
 });
